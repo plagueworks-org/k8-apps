@@ -109,9 +109,12 @@ jobs:
         run: |
           mkdir -p ~/.oci
           KEY_PATH=~/.oci/oci_api_key.pem 
+          COMPUTE_PUBLIC_KEY_PATH=~/.oci/oci_compute_public_key.pem
 
           echo "${{ steps.doppler_oci.outputs.OCI_API_KEY_PRIVATE }}" > $KEY_PATH
+          echo "${{ steps.doppler_oci.outputs.OCI_COMPUTE_KEY_PUBLIC }}" > $COMPUTE_PUBLIC_KEY_PATH
           chmod 600 ~/.oci/oci_api_key.pem
+          chmod 600 ~/.oci/oci_compute_public_key.pem
 
           echo "[OCI-${{ inputs.cloud_account_name }}]" > ~/.oci/config
           echo "user=${{ steps.get_account_config.outputs.user_ocid }}" >> ~/.oci/config
@@ -165,7 +168,7 @@ jobs:
             NEW_SESSION=$(oci bastion session create-port-forwarding \
               --bastion-id "${{ steps.get_bastion_id.outputs.id }}" \
               --display-name "gha-session-pf-$(date +%s)" \
-              --ssh-public-key-file "/home/$(whoami)/.oci/keys/oci_compute_public_key.pem" \
+              --ssh-public-key-file "/.oci/oci_compute_public_key.pem" \
               --target-private-ip "${{ inputs.target_ssh_ip_address }}" \
               --target-port "${{ inputs.target_ssh_port }}" \
               --session-ttl 10800 \
