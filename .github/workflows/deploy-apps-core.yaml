@@ -10,9 +10,13 @@ on:
       - fix/*
       - hotfix/*
       - release/*
+    paths:
+      - "core/**"
   pull_request:
     branches:
       - main
+    paths:
+      - "core/**"
   workflow_dispatch:
 
 env:
@@ -22,7 +26,7 @@ env:
   METRICS_SERVER_VERSION: "v0.7.2"
 
 jobs:
-  setup-oke-kubeconfig:
+  job-get-cluster:
     runs-on: ubuntu-latest
     environment: production
     outputs:
@@ -120,17 +124,17 @@ jobs:
           echo "cluster_private_ip=$CLUSTER_PRIVATE_IP" >> $GITHUB_OUTPUT
 
   setup-bastion-session:
-    needs: setup-oke-kubeconfig
+    needs: job-get-cluster
     uses: ./.github/workflows/oci-bstn-pf-session-finder.yml
     with:
       cloud_account_name: "ZEUS"
-      target_ssh_ip_address: ${{ needs.setup-oke-kubeconfig.outputs.cluster_private_ip }}
+      target_ssh_ip_address: ${{ needs.job-get-cluster.outputs.cluster_private_ip }}
       target_ssh_port: "6443"
       target_cloud_region: "af-johannesburg-1"
     secrets: inherit
 
-  test-cluster-connectivity:
-    needs: [setup-oke-kubeconfig, setup-bastion-session]
+  deploy-apps:
+    needs: [job-get-cluster, setup-bastion-session]
     runs-on: ubuntu-latest
     environment: production
 
@@ -187,7 +191,7 @@ jobs:
           mkdir -p $HOME/.kube
 
           oci ce cluster create-kubeconfig \
-            --cluster-id ${{ needs.setup-oke-kubeconfig.outputs.cluster_id }} \
+            --cluster-id ${{ needs.job-get-cluster.outputs.cluster_id }} \
             --file $HOME/.kube/config \
             --region ${{ env.OCI_ZEUS_REGION }} \
             --token-version 2.0.0
