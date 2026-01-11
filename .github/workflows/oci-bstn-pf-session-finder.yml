@@ -156,114 +156,38 @@ jobs:
           # Add the ID to the GitHub output
           echo "id=$ID" >> $GITHUB_OUTPUT
 
-      # - name: "Get or Create an Active Session From Bastion"
-      #   id: get_bastion_session_id
-      #   run: |
-      #     EXISTING_SESSION=$(oci bastion session list --session-lifecycle-state "ACTIVE" --profile "OCI-${{ inputs.cloud_account_name }}" --bastion-id "${{ steps.get_bastion_id.outputs.id }}" | jq -r '.data[] | select(.["target-resource-details"]["target-resource-private-ip-address"] == "${{ inputs.target_ssh_ip_address }}" and .["target-resource-details"]["target-resource-port"] == "${{ inputs.target_ssh_port }}")')
-
-      #     if [ -z "$EXISTING_SESSION" ] || [ "$EXISTING_SESSION" = "null" ]; then
-      #       echo "No active session found. Creating new session..."
-
-      #       # Create new session
-      #       NEW_SESSION=$(oci bastion session create-port-forwarding \
-      #         --bastion-id "${{ steps.get_bastion_id.outputs.id }}" \
-      #         --display-name "gha-session-pf-$(date +%s)" \
-      #         --ssh-public-key-file "/.oci/oci_compute_public_key.pem" \
-      #         --target-private-ip "${{ inputs.target_ssh_ip_address }}" \
-      #         --target-port "${{ inputs.target_ssh_port }}" \
-      #         --session-ttl 10800 \
-      #         --wait-for-state "SUCCEEDED" \
-      #         --wait-for-state "FAILED" \
-      #         --profile "OCI-${{ inputs.cloud_account_name }}")
-
-      #       # Get the session ID from the new session
-      #       SESSION_ID=$(echo "$NEW_SESSION" | jq -r '.data.resources[0].identifier')
-
-      #       echo "Created new session: $SESSION_ID"
-      #     else
-      #       echo "Found existing active session"
-      #       SESSION_ID=$(echo "$EXISTING_SESSION" | jq -r '.id')
-      #       echo "Using existing session: $SESSION_ID"
-      #     fi
-
-      #     echo "session_id=$SESSION_ID" >> $GITHUB_OUTPUT
       - name: "Get or Create an Active Session From Bastion"
         id: get_bastion_session_id
         run: |
-          echo "Searching for existing active session..."
-          echo "Target IP: ${{ inputs.target_ssh_ip_address }}"
-          echo "Target Port: ${{ inputs.target_ssh_port }}"
-
-          # First, fix the OCI config permissions warning
-          chmod 600 ~/.oci/config
-
-          EXISTING_SESSION=$(oci bastion session list \
-            --session-lifecycle-state "ACTIVE" \
+          EXISTING_SESSION=$(oci bastion session list --session-lifecycle-state "ACTIVE" \
             --profile "OCI-${{ inputs.cloud_account_name }}" \
             --bastion-id "${{ steps.get_bastion_id.outputs.id }}" \
             --all \
-            | jq -r '.data[] | select(.["target-resource-details"]["target-resource-private-ip-address"] == "${{ inputs.target_ssh_ip_address }}" and (.["target-resource-details"]["target-resource-port"] | tostring) == "${{ inputs.target_ssh_port }}")')
+            | jq -r '.data[] | select(.["target-resource-details"]["target-resource-private-ip-address"] == "${{ inputs.target_ssh_ip_address }}" and .["target-resource-details"]["target-resource-port"] == "${{ inputs.target_ssh_port }}")')
 
           if [ -z "$EXISTING_SESSION" ] || [ "$EXISTING_SESSION" = "null" ]; then
             echo "No active session found. Creating new session..."
             
-            echo "=== Session Creation Parameters ==="
-            echo "Bastion ID: ${{ steps.get_bastion_id.outputs.id }}"
-            echo "Target IP: ${{ inputs.target_ssh_ip_address }}"
-            echo "Target Port: ${{ inputs.target_ssh_port }}"
-            echo "SSH Public Key File: $HOME/.oci/keys/oci_compute_public_key.pem"
-            echo "===================================="
-            
-            # Verify the public key file exists
-            if [ ! -f "$HOME/.oci/keys/oci_compute_public_key.pem" ]; then
-              echo "Error: SSH public key file not found at $HOME/.oci/keys/oci_compute_public_key.pem"
-              exit 1
-            fi
-            
-            echo "Public key content:"
-            cat "$HOME/.oci/keys/oci_compute_public_key.pem"
-            
-            # Create new session with detailed error output
-            set +e  # Don't exit on error
+            # Create new session
             NEW_SESSION=$(oci bastion session create-port-forwarding \
               --bastion-id "${{ steps.get_bastion_id.outputs.id }}" \
               --display-name "gha-session-pf-$(date +%s)" \
-              --ssh-public-key-file "$HOME/.oci/keys/oci_compute_public_key.pem" \
+              --ssh-public-key-file "/.oci/oci_compute_public_key.pem" \
               --target-private-ip "${{ inputs.target_ssh_ip_address }}" \
               --target-port "${{ inputs.target_ssh_port }}" \
               --session-ttl 10800 \
               --wait-for-state "SUCCEEDED" \
               --wait-for-state "FAILED" \
-              --profile "OCI-${{ inputs.cloud_account_name }}" 2>&1)
+              --profile "OCI-${{ inputs.cloud_account_name }}")
             
-            EXIT_CODE=$?
-            set -e  # Re-enable exit on error
-            
-            if [ $EXIT_CODE -ne 0 ]; then
-              echo "=== Session Creation Failed ==="
-              echo "Exit code: $EXIT_CODE"
-              echo "Output:"
-              echo "$NEW_SESSION"
-              echo "=============================="
-              exit 1
-            fi
-            
-            echo "Session creation output:"
-            echo "$NEW_SESSION"
-            
+            # Get the session ID from the new session
             SESSION_ID=$(echo "$NEW_SESSION" | jq -r '.data.resources[0].identifier')
-            
-            if [ -z "$SESSION_ID" ] || [ "$SESSION_ID" == "null" ]; then
-              echo "Error: Failed to extract session ID from response"
-              echo "Response was:"
-              echo "$NEW_SESSION"
-              exit 1
-            fi
-            
-            echo "✓ Created new session: $SESSION_ID"
+
+            echo "Created new session: $SESSION_ID"
           else
+            echo "Found existing active session"
             SESSION_ID=$(echo "$EXISTING_SESSION" | jq -r '.id')
-            echo "✓ Using existing session: $SESSION_ID"
+            echo "Using existing session: $SESSION_ID"
           fi
 
           echo "session_id=$SESSION_ID" >> $GITHUB_OUTPUT
