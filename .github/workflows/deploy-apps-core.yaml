@@ -149,7 +149,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kubeconfig
-          path: $HOME/.kube/config
+          path: /home/runner/.kube/config
           retention-days: 1
 
   setup-bastion-session:
