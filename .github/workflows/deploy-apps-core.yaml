@@ -33,10 +33,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Kfilt
-        run: |
-          wget -O /usr/local/bin/kfilt https://github.com/ryane/kfilt/releases/download/v${KFILTVERSION}/kfilt_${KFILTVERSION}_linux_amd64
-          chmod +x /usr/local/bin/kfilt
+      # - name: Install Kfilt
+      #   run: |
+      #     wget -O /usr/local/bin/kfilt https://github.com/ryane/kfilt/releases/download/v${KFILTVERSION}/kfilt_${KFILTVERSION}_linux_amd64
+      #     chmod +x /usr/local/bin/kfilt
 
       # - name: Install kubectl
       #   uses: azure/setup-kubectl@v3
