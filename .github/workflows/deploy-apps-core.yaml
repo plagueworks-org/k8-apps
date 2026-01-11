@@ -199,7 +199,7 @@ jobs:
 
           # Verify kubeconfig content
           echo "Kubeconfig server:"
-          cat $HOME/.kube/config | grep server:
+          cat $HOME/.kube/config | grep "server:"
 
       - name: Start Port Forward Tunnel
         run: |
