@@ -186,15 +186,20 @@ jobs:
           chmod 600 $HOME/.kube/config
           echo "✓ Kubeconfig restored"
 
-      - name: "Setup Key Files"
+      - name: Restore Kubeconfig
         run: |
-          mkdir -p ~/.oci
+          mkdir -p $HOME/.kube
+          echo "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
 
-          COMPUTE_PRIVATE_KEY_PATH=~/.oci/oci_compute_private_key.pem
+          # Set KUBECONFIG for the entire job
+          echo "KUBECONFIG=$HOME/.kube/config" >> $GITHUB_ENV
 
-          echo "${{ steps.doppler_oci.outputs.OCI_COMPUTE_KEY_PRIVATE }}" > $COMPUTE_PRIVATE_KEY_PATH
+          echo "✓ Kubeconfig restored"
 
-          chmod 600 ~/.oci/oci_compute_private_key.pem
+          # Verify kubeconfig content
+          echo "Kubeconfig server:"
+          cat $HOME/.kube/config | grep server:
 
       - name: Start Port Forward Tunnel
         run: |
@@ -214,6 +219,7 @@ jobs:
       - name: Test Cluster Connectivity
         run: |
           echo "Testing cluster connectivity..."
+          echo "Using kubeconfig: $KUBECONFIG"
           kubectl cluster-info
           kubectl get nodes
 
