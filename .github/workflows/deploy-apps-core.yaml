@@ -38,297 +38,301 @@ jobs:
           wget -O /usr/local/bin/kfilt https://github.com/ryane/kfilt/releases/download/v${KFILTVERSION}/kfilt_${KFILTVERSION}_linux_amd64
           chmod +x /usr/local/bin/kfilt
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: "v1.28.0"
+      # - name: Install kubectl
+      #   uses: azure/setup-kubectl@v3
+      #   with:
+      #     version: "v1.28.0"
 
-      - name: Install Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: "v3.12.0"
+      # - name: Install Helm
+      #   uses: azure/setup-helm@v4
+      #   with:
+      #     version: "v3.12.0"
 
-      - name: Install yq
-        run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-
-      - name: "Authenticate to Doppler OCI Repo"
-        uses: dopplerhq/secrets-fetch-action@v1.3.0
-        id: doppler_oci
-        with:
-          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
-          doppler-project: cloud-oci-creds
-          doppler-config: prd
-
-      - name: "Authenticate to Doppler Apps Repo"
-        uses: dopplerhq/secrets-fetch-action@v1.3.0
-        id: doppler_apps
-        with:
-          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
-          doppler-project: apps-creds
-          doppler-config: prd
-
-      - name: "Setup OCI Config File"
-        run: |
-          mkdir -p ~/.oci
-          KEY_PATH=~/.oci/oci_api_key.pem 
-
-          echo "${{ steps.doppler_oci.outputs.OCI_API_KEY_PRIVATE }}" > $KEY_PATH
-          chmod 600 ~/.oci/oci_api_key.pem
-
-          echo "[DEFAULT]" > ~/.oci/config
-          echo "user=${{ steps.doppler_oci.outputs.OCI_ZEUS_USER_OCID }}" >> ~/.oci/config
-          echo "fingerprint=${{ steps.doppler_oci.outputs.OCI_API_FINGERPRINT }}" >> ~/.oci/config
-          echo "key_file=$KEY_PATH" >> ~/.oci/config
-          echo "tenancy=${{ steps.doppler_oci.outputs.OCI_ZEUS_TENANCY_OCID }}" >> ~/.oci/config
-          echo "region=${{ env.OCI_ZEUS_REGION }}" >> ~/.oci/config
-
-      - name: Install OCI CLI
-        run: |
-          echo "Downloading and installing OCI CLI..."   
-          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh > install.sh
-          chmod +x install.sh
-          ./install.sh --accept-all-defaults
-          echo "$HOME/bin" >> $GITHUB_PATH
-
-      - name: Find The OKE Cluster ID and Private IP
-        id: find-cluster
-        run: |
-          echo "Searching for OKE cluster named '${{ env.OCI_CLUSTER_NAME }}'..."
-
-          CLUSTER_DATA=$(oci ce cluster list \
-            --compartment-id ${{ steps.doppler_oci.outputs.OCI_ZEUS_COMPARTMENT_PRODUCTION_ID }} \
-            --lifecycle-state ACTIVE \
-            --all \
-            --query "data[?name=='${{ env.OCI_CLUSTER_NAME }}'] | [0]" \
-            --output json)
-
-          if [ -z "$CLUSTER_DATA" ] || [ "$CLUSTER_DATA" == "null" ]; then
-            echo "Error: No OKE cluster named '${{ env.OCI_CLUSTER_NAME }}' found"
-            exit 1
-          fi
-
-          CLUSTER_ID=$(echo "$CLUSTER_DATA" | jq -r '.id')
-          CLUSTER_PRIVATE_IP=$(echo "$CLUSTER_DATA" | jq -r '.endpoints["private-endpoint"]' | sed 's|https://||' | sed 's|:6443||')
-
-          echo "Found OKE cluster '${{ env.OCI_CLUSTER_NAME }}'"
-          echo "Cluster ID: $CLUSTER_ID"
-          echo "Private IP: $CLUSTER_PRIVATE_IP"
-
-          echo "cluster_id=$CLUSTER_ID" >> $GITHUB_OUTPUT
-          echo "cluster_private_ip=$CLUSTER_PRIVATE_IP" >> $GITHUB_OUTPUT
-
-          echo "::add-mask::$CLUSTER_ID"
-
-      - name: Generate OKE Kubeconfig
-        run: |
-          echo "Generating kubeconfig for cluster..."
-          mkdir -p $HOME/.kube
-
-          oci ce cluster create-kubeconfig \
-            --cluster-id ${{ steps.find-cluster.outputs.cluster_id }} \
-            --file $HOME/.kube/config \
-            --region ${{ env.OCI_ZEUS_REGION }} \
-            --token-version 2.0.0
-
-          echo "✓ Kubeconfig generated successfully"
-
-          echo "Updating server URL to localhost..."
-          yq eval '.clusters[0].cluster.server = "https://127.0.0.1:6443"' -i $HOME/.kube/config
-
-          echo "Setting up kubeconfig permissions..."   
-          oci setup repair-file-permissions --file /home/runner/.oci/config
-
-      - name: Export Kubeconfig as Base64
-        id: export-kubeconfig
-        run: |
-          KUBECONFIG_BASE64=$(cat $HOME/.kube/config | base64 -w 0)
-          echo "kubeconfig_base64=$KUBECONFIG_BASE64" >> $GITHUB_OUTPUT
-
-  setup-bastion-session:
-    needs: setup-oke-kubeconfig
-    uses: ./.github/workflows/oci-bstn-pf-session-finder.yml
-    with:
-      cloud_account_name: "ZEUS"
-      target_ssh_ip_address: ${{ needs.setup-oke-kubeconfig.outputs.cluster_private_ip }}
-      target_ssh_port: "6443"
-      target_cloud_region: "af-johannesburg-1"
-    secrets: inherit
-
-  test-cluster-connectivity:
-    needs: [setup-oke-kubeconfig, setup-bastion-session]
-    runs-on: ubuntu-latest
-    environment: production
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: "Authenticate to Doppler OCI Repo"
-        uses: dopplerhq/secrets-fetch-action@v1.3.0
-        id: doppler_oci
-        with:
-          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
-          doppler-project: cloud-oci-creds
-          doppler-config: prd
-
-      - name: Install OCI CLI
-        run: |
-          echo "Downloading and installing OCI CLI..."   
-          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh > install.sh
-          chmod +x install.sh
-          ./install.sh --accept-all-defaults
-          echo "$HOME/bin" >> $GITHUB_PATH
-
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: "v1.28.0"
-
-      - name: Restore Kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" | base64 -d > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-          echo "✓ Kubeconfig restored"
-
-      - name: Restore Kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-
-          echo "Checking if kubeconfig_base64 output exists..."
-          if [ -z "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" ]; then
-            echo "Error: kubeconfig_base64 is empty!"
-            exit 1
-          fi
-
-          echo "Decoding kubeconfig..."
-          echo "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" | base64 -d > $HOME/.kube/config
-
-          echo "Checking kubeconfig file size..."
-          ls -lh $HOME/.kube/config
-
-          if [ ! -s $HOME/.kube/config ]; then
-            echo "Error: Kubeconfig file is empty!"
-            exit 1
-          fi
-
-          chmod 600 $HOME/.kube/config
-
-          # Set KUBECONFIG for the entire job
-          echo "KUBECONFIG=$HOME/.kube/config" >> $GITHUB_ENV
-
-          echo "✓ Kubeconfig restored"
-
-      - name: "Setup SSH Keys"
-        run: |
-          mkdir -p ~/.oci
-          COMPUTE_PRIVATE_KEY_PATH=~/.oci/oci_compute_private_key.pem
-
-          echo "${{ steps.doppler_oci.outputs.OCI_COMPUTE_KEY_PRIVATE }}" > $COMPUTE_PRIVATE_KEY_PATH
-
-          chmod 600 ~/.oci/oci_compute_private_key.pem
-
-      - name: Start Port Forward Tunnel
-        run: |
-          echo "Starting SSH port forwarding tunnel..."
-
-          ${{ needs.setup-bastion-session.outputs.ssh_command }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -N -f
-
-          sleep 5
-
-          if nc -z 127.0.0.1 6443; then
-            echo "✓ Port forwarding tunnel established"
-          else
-            echo "✗ Tunnel failed"
-            exit 1
-          fi
-
-      - name: Test Cluster Connectivity
-        run: |
-          echo "Testing cluster connectivity..."
-          echo "Using kubeconfig: $KUBECONFIG"
-          kubectl cluster-info
-          kubectl get nodes
-
-      # - name: Apply the base config requirements
+      # - name: Install yq
       #   run: |
+      #     sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+      #     sudo chmod +x /usr/local/bin/yq
 
-      #     # Apply the base configs
-      #     kubectl apply -f apps/base
+      # - name: "Authenticate to Doppler OCI Repo"
+      #   uses: dopplerhq/secrets-fetch-action@v1.3.0
+      #   id: doppler_oci
+      #   with:
+      #     doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+      #     doppler-project: cloud-oci-creds
+      #     doppler-config: prd
 
-      # - name: Install Metrics Server API
+      # - name: "Authenticate to Doppler Apps Repo"
+      #   uses: dopplerhq/secrets-fetch-action@v1.3.0
+      #   id: doppler_apps
+      #   with:
+      #     doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+      #     doppler-project: apps-creds
+      #     doppler-config: prd
+
+      - name: "Test"
+        run: |
+          ls ~/.oci
+
+      # - name: "Setup OCI Config File"
       #   run: |
-      #     kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/${{ env.METRICS_SERVER_VERSION }}/components.yaml
+      #     mkdir -p ~/.oci
+      #     KEY_PATH=~/.oci/oci_api_key.pem
 
-      # - name: Create Initial DopplerToken Generic Secret
+      #     echo "${{ steps.doppler_oci.outputs.OCI_API_KEY_PRIVATE }}" > $KEY_PATH
+      #     chmod 600 ~/.oci/oci_api_key.pem
+
+      #     echo "[DEFAULT]" > ~/.oci/config
+      #     echo "user=${{ steps.doppler_oci.outputs.OCI_ZEUS_USER_OCID }}" >> ~/.oci/config
+      #     echo "fingerprint=${{ steps.doppler_oci.outputs.OCI_API_FINGERPRINT }}" >> ~/.oci/config
+      #     echo "key_file=$KEY_PATH" >> ~/.oci/config
+      #     echo "tenancy=${{ steps.doppler_oci.outputs.OCI_ZEUS_TENANCY_OCID }}" >> ~/.oci/config
+      #     echo "region=${{ env.OCI_ZEUS_REGION }}" >> ~/.oci/config
+
+      # - name: Install OCI CLI
       #   run: |
+      #     echo "Downloading and installing OCI CLI..."
+      #     curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh > install.sh
+      #     chmod +x install.sh
+      #     ./install.sh --accept-all-defaults
+      #     echo "$HOME/bin" >> $GITHUB_PATH
 
-      #     echo "Creating initial Doppler Token Secret in Default Namespace"
-
-      #     kubectl create secret generic doppler-token-auth-api \
-      #       --from-literal=dopplerToken='${{ secrets.DOPPLER_TOKEN }}' \
-      #       --namespace=default \
-      #       --dry-run=client -o yaml | kubectl apply -f -
-
-      # - name: Install External Secrets Operator
+      # - name: Find The OKE Cluster ID and Private IP
+      #   id: find-cluster
       #   run: |
-      #     cd apps/
+      #     echo "Searching for OKE cluster named '${{ env.OCI_CLUSTER_NAME }}'..."
 
-      #     echo "Installing External Secrets..."
+      #     CLUSTER_DATA=$(oci ce cluster list \
+      #       --compartment-id ${{ steps.doppler_oci.outputs.OCI_ZEUS_COMPARTMENT_PRODUCTION_ID }} \
+      #       --lifecycle-state ACTIVE \
+      #       --all \
+      #       --query "data[?name=='${{ env.OCI_CLUSTER_NAME }}'] | [0]" \
+      #       --output json)
 
-      #     # Install external-secrets
-      #     kubectl kustomize --enable-helm external-secrets/ > external-secrets-config.yaml
-      #     kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl -n es apply -f -
-      #     kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
-      #     kubectl -n es apply -f external-secrets-config.yaml
+      #     if [ -z "$CLUSTER_DATA" ] || [ "$CLUSTER_DATA" == "null" ]; then
+      #       echo "Error: No OKE cluster named '${{ env.OCI_CLUSTER_NAME }}' found"
+      #       exit 1
+      #     fi
 
-      #     echo "External Secrets installation completed"
+      #     CLUSTER_ID=$(echo "$CLUSTER_DATA" | jq -r '.id')
+      #     CLUSTER_PRIVATE_IP=$(echo "$CLUSTER_DATA" | jq -r '.endpoints["private-endpoint"]' | sed 's|https://||' | sed 's|:6443||')
 
-      # - name: Install Traefik
+      #     echo "Found OKE cluster '${{ env.OCI_CLUSTER_NAME }}'"
+      #     echo "Cluster ID: $CLUSTER_ID"
+      #     echo "Private IP: $CLUSTER_PRIVATE_IP"
+
+      #     echo "cluster_id=$CLUSTER_ID" >> $GITHUB_OUTPUT
+      #     echo "cluster_private_ip=$CLUSTER_PRIVATE_IP" >> $GITHUB_OUTPUT
+
+      #     echo "::add-mask::$CLUSTER_ID"
+
+      # - name: Generate OKE Kubeconfig
       #   run: |
-      #     cd apps/
+      #     echo "Generating kubeconfig for cluster..."
+      #     mkdir -p $HOME/.kube
 
-      #     echo "Installing Traefik..."
-      #     kubectl kustomize --enable-helm traefik/ > traefik-config.yaml
-      #     kfilt -i kind=CustomResourceDefinition -f traefik-config.yaml | kubectl -n traefik apply -f -
-      #     kfilt -i kind=CustomResourceDefinition -f traefik-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
-      #     kubectl -n traefik apply -f traefik-config.yaml
+      #     oci ce cluster create-kubeconfig \
+      #       --cluster-id ${{ steps.find-cluster.outputs.cluster_id }} \
+      #       --file $HOME/.kube/config \
+      #       --region ${{ env.OCI_ZEUS_REGION }} \
+      #       --token-version 2.0.0
 
-      #     echo "Waiting for Traefik to be ready..."
-      #     kubectl wait --for=condition=ready pod -n traefik -l app.kubernetes.io/name=traefik --timeout=300s
+      #     echo "✓ Kubeconfig generated successfully"
 
-      #     echo "Traefik installation completed"
+      #     echo "Updating server URL to localhost..."
+      #     yq eval '.clusters[0].cluster.server = "https://127.0.0.1:6443"' -i $HOME/.kube/config
 
-      # - name: Install External DNS
+      #     echo "Setting up kubeconfig permissions..."
+      #     oci setup repair-file-permissions --file /home/runner/.oci/config
+
+      # - name: Export Kubeconfig as Base64
+      #   id: export-kubeconfig
       #   run: |
-      #     cd apps/
+      #     KUBECONFIG_BASE64=$(cat $HOME/.kube/config | base64 -w 0)
+      #     echo "kubeconfig_base64=$KUBECONFIG_BASE64" >> $GITHUB_OUTPUT
 
-      #     echo "Installing External DNS..."
-      #     kubectl kustomize --enable-helm external-dns/ > external-dns-config.yaml
-      #     kfilt -i kind=CustomResourceDefinition -f external-dns-config.yaml | kubectl -n ed apply -f -
-      #     kfilt -i kind=CustomResourceDefinition -f external-dns-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
-      #     kubectl -n ed apply -f external-dns-config.yaml
+  # setup-bastion-session:
+  #   needs: setup-oke-kubeconfig
+  #   uses: ./.github/workflows/oci-bstn-pf-session-finder.yml
+  #   with:
+  #     cloud_account_name: "ZEUS"
+  #     target_ssh_ip_address: ${{ needs.setup-oke-kubeconfig.outputs.cluster_private_ip }}
+  #     target_ssh_port: "6443"
+  #     target_cloud_region: "af-johannesburg-1"
+  #   secrets: inherit
 
-      #     echo "Waiting for External DNS to be ready..."
-      #     kubectl wait --for=condition=ready pod -n ed -l app.kubernetes.io/name=external-dns --timeout=300s
+  # test-cluster-connectivity:
+  #   needs: [setup-oke-kubeconfig, setup-bastion-session]
+  #   runs-on: ubuntu-latest
+  #   environment: production
 
-      #     echo "External DNS installation completed"
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      # - name: Install ArgoCD
-      #   run: |
-      #     cd apps/
+  #     - name: "Authenticate to Doppler OCI Repo"
+  #       uses: dopplerhq/secrets-fetch-action@v1.3.0
+  #       id: doppler_oci
+  #       with:
+  #         doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+  #         doppler-project: cloud-oci-creds
+  #         doppler-config: prd
 
-      #     echo "Installing ArgoCD..."
-      #     kubectl kustomize --enable-helm argocd/ > argocd-config.yaml
-      #     kubectl -n argocd apply -f argocd-config.yaml
+  #     - name: Install OCI CLI
+  #       run: |
+  #         echo "Downloading and installing OCI CLI..."
+  #         curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh > install.sh
+  #         chmod +x install.sh
+  #         ./install.sh --accept-all-defaults
+  #         echo "$HOME/bin" >> $GITHUB_PATH
 
-      #     echo "Waiting for ArgoCD to be ready..."
-      #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-server --timeout=300s
-      #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-repo-server --timeout=300s
-      #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-redis --timeout=300s
-      #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-dex-server --timeout=300s
-      #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-applicationset-controller --timeout=300s
+  #     - name: Install kubectl
+  #       uses: azure/setup-kubectl@v3
+  #       with:
+  #         version: "v1.28.0"
 
-      #     echo "ArgoCD installation completed"
+  #     - name: Restore Kubeconfig
+  #       run: |
+  #         mkdir -p $HOME/.kube
+  #         echo "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" | base64 -d > $HOME/.kube/config
+  #         chmod 600 $HOME/.kube/config
+  #         echo "✓ Kubeconfig restored"
+
+  #     - name: Restore Kubeconfig
+  #       run: |
+  #         mkdir -p $HOME/.kube
+
+  #         echo "Checking if kubeconfig_base64 output exists..."
+  #         if [ -z "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" ]; then
+  #           echo "Error: kubeconfig_base64 is empty!"
+  #           exit 1
+  #         fi
+
+  #         echo "Decoding kubeconfig..."
+  #         echo "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" | base64 -d > $HOME/.kube/config
+
+  #         echo "Checking kubeconfig file size..."
+  #         ls -lh $HOME/.kube/config
+
+  #         if [ ! -s $HOME/.kube/config ]; then
+  #           echo "Error: Kubeconfig file is empty!"
+  #           exit 1
+  #         fi
+
+  #         chmod 600 $HOME/.kube/config
+
+  #         # Set KUBECONFIG for the entire job
+  #         echo "KUBECONFIG=$HOME/.kube/config" >> $GITHUB_ENV
+
+  #         echo "✓ Kubeconfig restored"
+
+  #     - name: "Setup SSH Keys"
+  #       run: |
+  #         mkdir -p ~/.oci
+  #         COMPUTE_PRIVATE_KEY_PATH=~/.oci/oci_compute_private_key.pem
+
+  #         echo "${{ steps.doppler_oci.outputs.OCI_COMPUTE_KEY_PRIVATE }}" > $COMPUTE_PRIVATE_KEY_PATH
+
+  #         chmod 600 ~/.oci/oci_compute_private_key.pem
+
+  #     - name: Start Port Forward Tunnel
+  #       run: |
+  #         echo "Starting SSH port forwarding tunnel..."
+
+  #         ${{ needs.setup-bastion-session.outputs.ssh_command }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -N -f
+
+  #         sleep 5
+
+  #         if nc -z 127.0.0.1 6443; then
+  #           echo "✓ Port forwarding tunnel established"
+  #         else
+  #           echo "✗ Tunnel failed"
+  #           exit 1
+  #         fi
+
+  #     - name: Test Cluster Connectivity
+  #       run: |
+  #         echo "Testing cluster connectivity..."
+  #         echo "Using kubeconfig: $KUBECONFIG"
+  #         kubectl cluster-info
+  #         kubectl get nodes
+
+  #     # - name: Apply the base config requirements
+  #     #   run: |
+
+  #     #     # Apply the base configs
+  #     #     kubectl apply -f apps/base
+
+  #     # - name: Install Metrics Server API
+  #     #   run: |
+  #     #     kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/${{ env.METRICS_SERVER_VERSION }}/components.yaml
+
+  #     # - name: Create Initial DopplerToken Generic Secret
+  #     #   run: |
+
+  #     #     echo "Creating initial Doppler Token Secret in Default Namespace"
+
+  #     #     kubectl create secret generic doppler-token-auth-api \
+  #     #       --from-literal=dopplerToken='${{ secrets.DOPPLER_TOKEN }}' \
+  #     #       --namespace=default \
+  #     #       --dry-run=client -o yaml | kubectl apply -f -
+
+  #     # - name: Install External Secrets Operator
+  #     #   run: |
+  #     #     cd apps/
+
+  #     #     echo "Installing External Secrets..."
+
+  #     #     # Install external-secrets
+  #     #     kubectl kustomize --enable-helm external-secrets/ > external-secrets-config.yaml
+  #     #     kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl -n es apply -f -
+  #     #     kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
+  #     #     kubectl -n es apply -f external-secrets-config.yaml
+
+  #     #     echo "External Secrets installation completed"
+
+  #     # - name: Install Traefik
+  #     #   run: |
+  #     #     cd apps/
+
+  #     #     echo "Installing Traefik..."
+  #     #     kubectl kustomize --enable-helm traefik/ > traefik-config.yaml
+  #     #     kfilt -i kind=CustomResourceDefinition -f traefik-config.yaml | kubectl -n traefik apply -f -
+  #     #     kfilt -i kind=CustomResourceDefinition -f traefik-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
+  #     #     kubectl -n traefik apply -f traefik-config.yaml
+
+  #     #     echo "Waiting for Traefik to be ready..."
+  #     #     kubectl wait --for=condition=ready pod -n traefik -l app.kubernetes.io/name=traefik --timeout=300s
+
+  #     #     echo "Traefik installation completed"
+
+  #     # - name: Install External DNS
+  #     #   run: |
+  #     #     cd apps/
+
+  #     #     echo "Installing External DNS..."
+  #     #     kubectl kustomize --enable-helm external-dns/ > external-dns-config.yaml
+  #     #     kfilt -i kind=CustomResourceDefinition -f external-dns-config.yaml | kubectl -n ed apply -f -
+  #     #     kfilt -i kind=CustomResourceDefinition -f external-dns-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
+  #     #     kubectl -n ed apply -f external-dns-config.yaml
+
+  #     #     echo "Waiting for External DNS to be ready..."
+  #     #     kubectl wait --for=condition=ready pod -n ed -l app.kubernetes.io/name=external-dns --timeout=300s
+
+  #     #     echo "External DNS installation completed"
+
+  #     # - name: Install ArgoCD
+  #     #   run: |
+  #     #     cd apps/
+
+  #     #     echo "Installing ArgoCD..."
+  #     #     kubectl kustomize --enable-helm argocd/ > argocd-config.yaml
+  #     #     kubectl -n argocd apply -f argocd-config.yaml
+
+  #     #     echo "Waiting for ArgoCD to be ready..."
+  #     #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-server --timeout=300s
+  #     #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-repo-server --timeout=300s
+  #     #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-redis --timeout=300s
+  #     #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-dex-server --timeout=300s
+  #     #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-applicationset-controller --timeout=300s
+
+  #     #     echo "ArgoCD installation completed"
