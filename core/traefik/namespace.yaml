@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: traefik
+  labels:
+    app: traefik
+    category: core
+  annotations:
+    scheduler.alpha.kubernetes.io/node-selector: role=default

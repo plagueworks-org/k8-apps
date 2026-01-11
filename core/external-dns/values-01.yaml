@@ -1,0 +1,43 @@
+provider:
+  name: cloudflare
+
+env:
+  - name: CF_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        # Use the name defined in your es.yaml target
+        name: cloudflare-creds
+        # Use the key defined in your es.yaml data
+        key: CLOUDFLARE_TERRAFORM_TOKEN
+
+logLevel: info
+policy: sync
+registry: txt
+txtOwnerId: ed-oke-zeus-prod-plagueworks-org
+
+sources:
+  - service  
+  - ingress
+  - traefik-proxy
+extraArgs:
+  - --cloudflare-proxied
+  - --ignore-ingress-rules-spec
+  - --ignore-ingress-tls-spec
+  # Add this for better CRD support
+  - --crd-source-apiversion=traefik.io/v1alpha1
+  - --crd-source-kind=IngressRoute
+  - --annotation-filter=external-dns.alpha.kubernetes.io/cloudflare-comment
+
+domainFilters:
+  - plagueworks.org
+
+triggerLoopOnEvent: true
+interval: 1m
+
+serviceMonitor:
+  enabled: false
+
+resources:
+  requests:
+    cpu: "50m"
+    memory: "64Mi"

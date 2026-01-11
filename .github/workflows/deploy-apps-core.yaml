@@ -231,7 +231,6 @@ jobs:
           echo "Testing cluster connectivity..."
           echo "Using kubeconfig: $KUBECONFIG"
           kubectl cluster-info
-          kubectl get nodes
 
       - name: Apply the base config requirements
         run: |
@@ -253,49 +252,59 @@ jobs:
             --namespace=default \
             --dry-run=client -o yaml | kubectl apply -f -
 
-  #     # - name: Install External Secrets Operator
-  #     #   run: |
-  #     #     cd apps/
+      - name: Install External Secrets Operator
+        run: |
+          cd core/
 
-  #     #     echo "Installing External Secrets..."
+          echo "Installing External Secrets..."
+          kubectl kustomize --enable-helm external-secrets/ > external-secrets-config.yaml
 
-  #     #     # Install external-secrets
-  #     #     kubectl kustomize --enable-helm external-secrets/ > external-secrets-config.yaml
-  #     #     kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl -n es apply -f -
-  #     #     kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
-  #     #     kubectl -n es apply -f external-secrets-config.yaml
+          # Step 1: Apply CRDs and wait for them
+          kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl apply --server-side -f -
+          kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl wait --for=condition=established --timeout=60s -f -
 
-  #     #     echo "External Secrets installation completed"
+          # Step 2: Apply operator resources (excluding custom resources)
+          kfilt -x kind=CustomResourceDefinition -x kind=ClusterSecretStore -x kind=ClusterExternalSecret -x kind=ExternalSecret -f external-secrets-config.yaml | kubectl apply --server-side -f -
 
-  #     # - name: Install Traefik
-  #     #   run: |
-  #     #     cd apps/
+          echo "Waiting for External Secrets Operator to be ready..."
+          kubectl wait --for=condition=ready pod -n es -l app.kubernetes.io/name=external-secrets --timeout=300s
+          kubectl wait --for=condition=ready pod -n es -l app.kubernetes.io/name=external-secrets-webhook --timeout=300s
+          kubectl wait --for=condition=ready pod -n es -l app.kubernetes.io/name=external-secrets-cert-controller --timeout=300s
 
-  #     #     echo "Installing Traefik..."
-  #     #     kubectl kustomize --enable-helm traefik/ > traefik-config.yaml
-  #     #     kfilt -i kind=CustomResourceDefinition -f traefik-config.yaml | kubectl -n traefik apply -f -
-  #     #     kfilt -i kind=CustomResourceDefinition -f traefik-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
-  #     #     kubectl -n traefik apply -f traefik-config.yaml
+          # Step 3: Apply custom resources after operator is ready
+          kfilt -i kind=ClusterSecretStore,ClusterExternalSecret,ExternalSecret -f external-secrets-config.yaml | kubectl apply --server-side -f -
 
-  #     #     echo "Waiting for Traefik to be ready..."
-  #     #     kubectl wait --for=condition=ready pod -n traefik -l app.kubernetes.io/name=traefik --timeout=300s
+          echo "External Secrets installation completed"
 
-  #     #     echo "Traefik installation completed"
+      - name: Install Traefik
+        run: |
+          cd core/
 
-  #     # - name: Install External DNS
-  #     #   run: |
-  #     #     cd apps/
+          echo "Installing Traefik..."
+          kubectl kustomize --enable-helm traefik/ > traefik-config.yaml
+          kfilt -i kind=CustomResourceDefinition -f traefik-config.yaml | kubectl -n traefik apply -f -
+          kfilt -i kind=CustomResourceDefinition -f traefik-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
+          kubectl -n traefik apply -f traefik-config.yaml
 
-  #     #     echo "Installing External DNS..."
-  #     #     kubectl kustomize --enable-helm external-dns/ > external-dns-config.yaml
-  #     #     kfilt -i kind=CustomResourceDefinition -f external-dns-config.yaml | kubectl -n ed apply -f -
-  #     #     kfilt -i kind=CustomResourceDefinition -f external-dns-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
-  #     #     kubectl -n ed apply -f external-dns-config.yaml
+          echo "Waiting for Traefik to be ready..."
+          kubectl wait --for=condition=ready pod -n traefik -l app.kubernetes.io/name=traefik --timeout=300s
 
-  #     #     echo "Waiting for External DNS to be ready..."
-  #     #     kubectl wait --for=condition=ready pod -n ed -l app.kubernetes.io/name=external-dns --timeout=300s
+          echo "Traefik installation completed"
 
-  #     #     echo "External DNS installation completed"
+      - name: Install External DNS
+        run: |
+          cd core/
+
+          echo "Installing External DNS..."
+          kubectl kustomize --enable-helm external-dns/ > external-dns-config.yaml
+          kfilt -i kind=CustomResourceDefinition -f external-dns-config.yaml | kubectl -n ed apply -f -
+          kfilt -i kind=CustomResourceDefinition -f external-dns-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
+          kubectl -n ed apply -f external-dns-config.yaml
+
+          echo "Waiting for External DNS to be ready..."
+          kubectl wait --for=condition=ready pod -n ed -l app.kubernetes.io/name=external-dns --timeout=300s
+
+          echo "External DNS installation completed"
 
   #     # - name: Install ArgoCD
   #     #   run: |
