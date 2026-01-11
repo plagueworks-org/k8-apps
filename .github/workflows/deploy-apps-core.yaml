@@ -196,20 +196,16 @@ jobs:
 
       - name: Start Port Forward Tunnel
         run: |
-          echo "SSH Command: ${{ needs.setup-bastion-session.outputs.ssh_command }}"
           echo "Starting SSH port forwarding tunnel..."
 
-          # Run SSH command in background
-          ${{ needs.setup-bastion-session.outputs.ssh_command }} -N -f
+          ${{ needs.setup-bastion-session.outputs.ssh_command }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -N -f
 
-          # Wait for tunnel to establish
           sleep 5
 
-          # Verify tunnel is working
           if nc -z 127.0.0.1 6443; then
-            echo "✓ Port forwarding tunnel established successfully"
+            echo "✓ Port forwarding tunnel established"
           else
-            echo "✗ Failed to establish port forwarding tunnel"
+            echo "✗ Tunnel failed"
             exit 1
           fi
 

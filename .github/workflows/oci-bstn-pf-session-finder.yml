@@ -124,6 +124,9 @@ jobs:
           echo "tenancy=${{ steps.get_account_config.outputs.tenancy_ocid }}" >> ~/.oci/config
           echo "region=${{ steps.get_account_config.outputs.region }}" >> ~/.oci/config
 
+
+          chmod 600 ~/.oci/config
+
       - name: Install OCI CLI
         run: |
           echo "Downloading and installing OCI CLI..."   
@@ -164,7 +167,7 @@ jobs:
               --profile "OCI-${{ inputs.cloud_account_name }}" \
             --bastion-id "${{ steps.get_bastion_id.outputs.id }}" \
             --all \
-            | jq -r '.data[] | select(.["target-resource-details"]["target-resource-private-ip-address"] == "${{ inputs.target_ssh_ip_address }}" and .["target-resource-details"]["target-resource-port"] == "${{ inputs.target_ssh_port }}")')
+            | jq -r '.data[] | select(.["target-resource-details"]["target-resource-private-ip-address"] == "${{ inputs.target_ssh_ip_address }}" and (.["target-resource-details"]["target-resource-port"] | tostring) == "${{ inputs.target_ssh_port }}")')
 
           if [ -z "$EXISTING_SESSION" ] || [ "$EXISTING_SESSION" = "null" ]; then
             echo "No active session found. Creating new session..."
