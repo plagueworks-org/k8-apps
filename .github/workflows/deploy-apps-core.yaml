@@ -214,9 +214,14 @@ jobs:
 
           echo "✓ Kubeconfig restored"
 
-          # Verify kubeconfig content
-          echo "Kubeconfig content:"
-          cat $HOME/.kube/config
+      - name: "Setup SSH Keys"
+        run: |
+          mkdir -p ~/.oci
+          COMPUTE_PRIVATE_KEY_PATH=~/.oci/oci_compute_private_key.pem
+
+          echo "${{ steps.doppler_oci.outputs.OCI_COMPUTE_KEY_PRIVATE }}" > $COMPUTE_PRIVATE_KEY_PATH
+
+          chmod 600 ~/.oci/oci_compute_private_key.pem
 
       - name: Start Port Forward Tunnel
         run: |
