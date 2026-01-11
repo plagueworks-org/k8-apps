@@ -187,7 +187,7 @@ jobs:
           mkdir -p $HOME/.kube
 
           oci ce cluster create-kubeconfig \
-            --cluster-id ${{ steps.find-cluster.outputs.cluster_id }} \
+            --cluster-id ${{ needs.setup-oke-kubeconfig.outputs.cluster_id }} \
             --file $HOME/.kube/config \
             --region ${{ env.OCI_ZEUS_REGION }} \
             --token-version 2.0.0
