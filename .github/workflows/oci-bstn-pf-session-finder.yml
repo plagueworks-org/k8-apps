@@ -160,7 +160,7 @@ jobs:
         id: get_bastion_session_id
         run: |
           EXISTING_SESSION=$(oci bastion session list --session-lifecycle-state "ACTIVE" \
-            --profile "OCI-${{ inputs.cloud_account_name }}" \
+              --profile "OCI-${{ inputs.cloud_account_name }}" \
             --bastion-id "${{ steps.get_bastion_id.outputs.id }}" \
             --all \
             | jq -r '.data[] | select(.["target-resource-details"]["target-resource-private-ip-address"] == "${{ inputs.target_ssh_ip_address }}" and .["target-resource-details"]["target-resource-port"] == "${{ inputs.target_ssh_port }}")')
@@ -172,7 +172,7 @@ jobs:
             NEW_SESSION=$(oci bastion session create-port-forwarding \
               --bastion-id "${{ steps.get_bastion_id.outputs.id }}" \
               --display-name "gha-session-pf-$(date +%s)" \
-              --ssh-public-key-file "/.oci/oci_compute_public_key.pem" \
+              --ssh-public-key-file "$HOME/.oci/oci_compute_public_key.pem" \
               --target-private-ip "${{ inputs.target_ssh_ip_address }}" \
               --target-port "${{ inputs.target_ssh_port }}" \
               --session-ttl 10800 \
