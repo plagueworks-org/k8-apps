@@ -1,0 +1,225 @@
+name: Deploy Core Applications to K8 Cluster
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - staging
+      - feature/*
+      - fix/*
+      - hotfix/*
+      - release/*
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  KFILTVERSION: "0.0.8"
+  OCI_ZEUS_REGION: "af-johannesburg-1"
+  OCI_CLUSTER_NAME: "applications"
+  METRICS_SERVER_VERSION: "v0.7.2"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Kfilt
+        run: |
+          wget -O /usr/local/bin/kfilt https://github.com/ryane/kfilt/releases/download/v${KFILTVERSION}/kfilt_${KFILTVERSION}_linux_amd64
+          chmod +x /usr/local/bin/kfilt
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: "v1.28.0"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: "v3.12.0"
+
+      - name: "Authenticate to Doppler OCI Repo"
+        uses: dopplerhq/secrets-fetch-action@v1.3.0
+        id: doppler_oci
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          doppler-project: cloud-oci-creds
+          doppler-config: prd
+
+      - name: "Authenticate to Doppler Apps Repo"
+        uses: dopplerhq/secrets-fetch-action@v1.3.0
+        id: doppler_apps
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          doppler-project: apps-creds
+          doppler-config: prd
+
+      - name: "Setup OCI Config File"
+        run: |
+
+          # Create the oci directory if it doesn't exist
+          mkdir -p ~/.oci
+
+          # Create local variable for private key path
+          KEY_PATH=~/.oci/oci_api_key.pem 
+
+          # Append an extra line with 'OCI_API_KEY' at the end
+          echo "\nOCI_API_KEY" >> $KEY_PATH
+
+
+          # Create the oci_api_key.pem file
+          echo "${{ steps.doppler_oci.outputs.OCI_API_KEY_PRIVATE }}" > $KEY_PATH
+          chmod 600 ~/.oci/oci_api_key.pem
+
+          # Create the config file
+          echo "[DEFAULT]" > ~/.oci/config
+          echo "user=${{ steps.doppler_oci.outputs.OCI_ZEUS_USER_OCID }}" >> ~/.oci/config
+          echo "fingerprint=${{ steps.doppler_oci.outputs.OCI_API_FINGERPRINT }}" >> ~/.oci/config
+          echo "key_file=$KEY_PATH" >> ~/.oci/config
+          echo "tenancy=${{ steps.doppler_oci.outputs.OCI_ZEUS_TENANCY_OCID }}" >> ~/.oci/config
+          echo "region=${{ env.OCI_ZEUS_REGION }}" >> ~/.oci/config
+
+      - name: Install OCI CLI
+        run: |
+          echo "Downloading and installing OCI CLI..."   
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh > install.sh
+          chmod +x install.sh
+
+          echo "Installing OCI CLI..."
+          ./install.sh --accept-all-defaults
+          echo "$HOME/bin" >> $GITHUB_PATH
+
+      - name: Find The OKE Cluster ID
+        id: find-cluster-id
+        run: |
+          echo "Searching for OKE cluster named '${{ env.OCI_CLUSTER_NAME }}'..."
+
+          CLUSTER_ID=$(oci ce cluster list \
+            --compartment-id ${{ steps.doppler_oci.outputs.OCI_ZEUS_COMPARTMENT_PRODUCTION_ID }} \
+            --lifecycle-state ACTIVE \
+            --all \
+            --query "data[?name=='${{ env.OCI_CLUSTER_NAME }}'].id | [0]" \
+            --raw-output)
+
+          if [ -z "$CLUSTER_ID" ] || [ "$CLUSTER_ID" == "null" ]; then
+            echo "Error: No OKE cluster named '${{ env.OCI_CLUSTER_NAME }}' found in compartment ${{ steps.doppler_oci.outputs.OCI_ZEUS_COMPARTMENT_PRODUCTION_ID }}"
+            exit 1
+          fi
+
+          echo "Found OKE cluster '${{ env.OCI_CLUSTER_NAME }}' with ID: $CLUSTER_ID"
+
+          # Set as step output
+          echo "cluster_id=$CLUSTER_ID" >> $GITHUB_OUTPUT
+
+          # Mask it as well
+          echo "::add-mask::$CLUSTER_ID"
+
+      - name: Generate OKE Kubeconfig
+        run: |
+          echo "Generating kubeconfig for cluster..."
+
+          oci ce cluster create-kubeconfig \
+            --cluster-id ${{ steps.find-cluster-id.outputs.cluster_id }} \
+            --file $HOME/.kube/config \
+            --region ${{ env.OCI_ZEUS_REGION }} \
+            --token-version 2.0.0 \
+            --kube-endpoint PUBLIC_ENDPOINT
+
+          echo "✓ Kubeconfig generated successfully"
+
+          echo "Setting up kubeconfig permissions..."   
+          oci setup repair-file-permissions --file /home/runner/.oci/config 
+
+          echo "Getting cluster info..."
+
+      - name: Test Cluster Connectivity
+        run: |
+          kubectl cluster-info
+
+      # - name: Apply the base config requirements
+      #   run: |
+
+      #     # Apply the base configs
+      #     kubectl apply -f apps/base
+
+      # - name: Install Metrics Server API
+      #   run: |
+      #     kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/${{ env.METRICS_SERVER_VERSION }}/components.yaml
+
+      # - name: Create Initial DopplerToken Generic Secret
+      #   run: |
+
+      #     echo "Creating initial Doppler Token Secret in Default Namespace"
+
+      #     kubectl create secret generic doppler-token-auth-api \
+      #       --from-literal=dopplerToken='${{ secrets.DOPPLER_TOKEN }}' \
+      #       --namespace=default \
+      #       --dry-run=client -o yaml | kubectl apply -f -
+
+      # - name: Install External Secrets Operator
+      #   run: |
+      #     cd apps/
+
+      #     echo "Installing External Secrets..."
+
+      #     # Install external-secrets
+      #     kubectl kustomize --enable-helm external-secrets/ > external-secrets-config.yaml
+      #     kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl -n es apply -f -
+      #     kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
+      #     kubectl -n es apply -f external-secrets-config.yaml
+
+      #     echo "External Secrets installation completed"
+
+      # - name: Install Traefik
+      #   run: |
+      #     cd apps/
+
+      #     echo "Installing Traefik..."
+      #     kubectl kustomize --enable-helm traefik/ > traefik-config.yaml
+      #     kfilt -i kind=CustomResourceDefinition -f traefik-config.yaml | kubectl -n traefik apply -f -
+      #     kfilt -i kind=CustomResourceDefinition -f traefik-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
+      #     kubectl -n traefik apply -f traefik-config.yaml
+
+      #     echo "Waiting for Traefik to be ready..."
+      #     kubectl wait --for=condition=ready pod -n traefik -l app.kubernetes.io/name=traefik --timeout=300s
+
+      #     echo "Traefik installation completed"
+
+      # - name: Install External DNS
+      #   run: |
+      #     cd apps/
+
+      #     echo "Installing External DNS..."
+      #     kubectl kustomize --enable-helm external-dns/ > external-dns-config.yaml
+      #     kfilt -i kind=CustomResourceDefinition -f external-dns-config.yaml | kubectl -n ed apply -f -
+      #     kfilt -i kind=CustomResourceDefinition -f external-dns-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
+      #     kubectl -n ed apply -f external-dns-config.yaml
+
+      #     echo "Waiting for External DNS to be ready..."
+      #     kubectl wait --for=condition=ready pod -n ed -l app.kubernetes.io/name=external-dns --timeout=300s
+
+      #     echo "External DNS installation completed"
+
+      # - name: Install ArgoCD
+      #   run: |
+      #     cd apps/
+
+      #     echo "Installing ArgoCD..."
+      #     kubectl kustomize --enable-helm argocd/ > argocd-config.yaml
+      #     kubectl -n argocd apply -f argocd-config.yaml
+
+      #     echo "Waiting for ArgoCD to be ready..."
+      #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-server --timeout=300s
+      #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-repo-server --timeout=300s
+      #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-redis --timeout=300s
+      #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-dex-server --timeout=300s
+      #     kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-applicationset-controller --timeout=300s
+
+      #     echo "ArgoCD installation completed"
