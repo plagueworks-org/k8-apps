@@ -163,16 +163,15 @@ jobs:
       - name: "Get or Create an Active Session From Bastion"
         id: get_bastion_session_id
         run: |
+
           EXISTING_SESSION=$(oci bastion session list --session-lifecycle-state "ACTIVE" \
-              --profile "OCI-${{ inputs.cloud_account_name }}" \
+            --profile "OCI-${{ inputs.cloud_account_name }}" \
             --bastion-id "${{ steps.get_bastion_id.outputs.id }}" \
-            --all \
-            | jq -r '.data[] | select(.["target-resource-details"]["target-resource-private-ip-address"] == "${{ inputs.target_ssh_ip_address }}" and (.["target-resource-details"]["target-resource-port"] | tostring) == "${{ inputs.target_ssh_port }}")')
+            --all | jq -r '.data[] | select(.["target-resource-details"]["target-resource-private-ip-address"] == "${{ inputs.target_ssh_ip_address }}" and (.["target-resource-details"]["target-resource-port"] | tostring) == "${{ inputs.target_ssh_port }}") | .id' | head -n 1)
 
           if [ -z "$EXISTING_SESSION" ] || [ "$EXISTING_SESSION" = "null" ]; then
             echo "No active session found. Creating new session..."
             
-            # Create new session
             NEW_SESSION=$(oci bastion session create-port-forwarding \
               --bastion-id "${{ steps.get_bastion_id.outputs.id }}" \
               --display-name "gha-session-pf-$(date +%s)" \
@@ -184,13 +183,11 @@ jobs:
               --wait-for-state "FAILED" \
               --profile "OCI-${{ inputs.cloud_account_name }}")
             
-            # Get the session ID from the new session
             SESSION_ID=$(echo "$NEW_SESSION" | jq -r '.data.resources[0].identifier')
-
             echo "Created new session: $SESSION_ID"
           else
             echo "Found existing active session"
-            SESSION_ID=$(echo "$EXISTING_SESSION" | jq -r '.id')
+            SESSION_ID="$EXISTING_SESSION"
             echo "Using existing session: $SESSION_ID"
           fi
 
