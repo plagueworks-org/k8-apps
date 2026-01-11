@@ -27,7 +27,6 @@ jobs:
     environment: production
     outputs:
       cluster_private_ip: ${{ steps.find-cluster.outputs.cluster_private_ip }}
-      kubeconfig_base64: ${{ steps.export-kubeconfig.outputs.kubeconfig_base64 }}
 
     steps:
       - name: Checkout code
@@ -146,6 +145,13 @@ jobs:
           KUBECONFIG_BASE64=$(cat $HOME/.kube/config | base64 -w 0)
           echo "kubeconfig_base64=$KUBECONFIG_BASE64" >> $GITHUB_OUTPUT
 
+      - name: Upload Kubeconfig as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kubeconfig
+          path: $HOME/.kube/config
+          retention-days: 1
+
   setup-bastion-session:
     needs: setup-oke-kubeconfig
     uses: ./.github/workflows/oci-bstn-pf-session-finder.yml
@@ -185,7 +191,7 @@ jobs:
           chmod 600 ~/.oci/oci_api_key.pem
           chmod 600 ~/.oci/oci_compute_public_key.pem
 
-          echo "[OCI-ZEUS]" > ~/.oci/config
+          echo "[DEFAULT]" > ~/.oci/config
           echo "user=${{ steps.doppler_oci.outputs.OCI_ZEUS_USER_OCID }}" >> ~/.oci/config
           echo "fingerprint=${{ steps.doppler_oci.outputs.OCI_API_FINGERPRINT }}" >> ~/.oci/config
           echo "key_file=$KEY_PATH" >> ~/.oci/config
@@ -208,39 +214,16 @@ jobs:
         with:
           version: "v1.28.0"
 
-      - name: Restore Kubeconfig
+      - name: Download Kubeconfig Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: kubeconfig
+          path: $HOME/.kube/
+
+      - name: Setup Kubeconfig
         run: |
-          mkdir -p $HOME/.kube
-          echo "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" | base64 -d > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
-          echo "✓ Kubeconfig restored"
-
-      - name: Restore Kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-
-          echo "Checking if kubeconfig_base64 output exists..."
-          if [ -z "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" ]; then
-            echo "Error: kubeconfig_base64 is empty!"
-            exit 1
-          fi
-
-          echo "Decoding kubeconfig..."
-          echo "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" | base64 -d > $HOME/.kube/config
-
-          echo "Checking kubeconfig file size..."
-          ls -lh $HOME/.kube/config
-
-          if [ ! -s $HOME/.kube/config ]; then
-            echo "Error: Kubeconfig file is empty!"
-            exit 1
-          fi
-
-          chmod 600 $HOME/.kube/config
-
-          # Set KUBECONFIG for the entire job
           echo "KUBECONFIG=$HOME/.kube/config" >> $GITHUB_ENV
-
           echo "✓ Kubeconfig restored"
 
       - name: "Setup SSH Keys"
