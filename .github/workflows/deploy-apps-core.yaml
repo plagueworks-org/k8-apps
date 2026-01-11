@@ -23,7 +23,7 @@ env:
 
 jobs:
   setup-oke-kubeconfig:
-    runs-on: [oke-runners]
+    runs-on: ubuntu-latest
     environment: production
     outputs:
       cluster_private_ip: ${{ steps.find-cluster.outputs.cluster_private_ip }}
@@ -33,229 +33,289 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # - name: Install Kfilt
-      #   run: |
-      #     wget -O /usr/local/bin/kfilt https://github.com/ryane/kfilt/releases/download/v${KFILTVERSION}/kfilt_${KFILTVERSION}_linux_amd64
-      #     chmod +x /usr/local/bin/kfilt
-
-      # - name: Install kubectl
-      #   uses: azure/setup-kubectl@v3
-      #   with:
-      #     version: "v1.28.0"
-
-      # - name: Install Helm
-      #   uses: azure/setup-helm@v4
-      #   with:
-      #     version: "v3.12.0"
-
-      # - name: Install yq
-      #   run: |
-      #     sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-      #     sudo chmod +x /usr/local/bin/yq
-
-      # - name: "Authenticate to Doppler OCI Repo"
-      #   uses: dopplerhq/secrets-fetch-action@v1.3.0
-      #   id: doppler_oci
-      #   with:
-      #     doppler-token: ${{ secrets.DOPPLER_TOKEN }}
-      #     doppler-project: cloud-oci-creds
-      #     doppler-config: prd
-
-      # - name: "Authenticate to Doppler Apps Repo"
-      #   uses: dopplerhq/secrets-fetch-action@v1.3.0
-      #   id: doppler_apps
-      #   with:
-      #     doppler-token: ${{ secrets.DOPPLER_TOKEN }}
-      #     doppler-project: apps-creds
-      #     doppler-config: prd
-
-      - name: "Test"
+      - name: Install Kfilt
         run: |
-          ls ~/.oci/keys
-          cat ~/.oci/config
+          wget -O /usr/local/bin/kfilt https://github.com/ryane/kfilt/releases/download/v${KFILTVERSION}/kfilt_${KFILTVERSION}_linux_amd64
+          chmod +x /usr/local/bin/kfilt
 
-      # - name: "Setup OCI Config File"
-      #   run: |
-      #     mkdir -p ~/.oci
-      #     KEY_PATH=~/.oci/oci_api_key.pem
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: "v1.28.0"
 
-      #     echo "${{ steps.doppler_oci.outputs.OCI_API_KEY_PRIVATE }}" > $KEY_PATH
-      #     chmod 600 ~/.oci/oci_api_key.pem
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: "v3.12.0"
 
-      #     echo "[DEFAULT]" > ~/.oci/config
-      #     echo "user=${{ steps.doppler_oci.outputs.OCI_ZEUS_USER_OCID }}" >> ~/.oci/config
-      #     echo "fingerprint=${{ steps.doppler_oci.outputs.OCI_API_FINGERPRINT }}" >> ~/.oci/config
-      #     echo "key_file=$KEY_PATH" >> ~/.oci/config
-      #     echo "tenancy=${{ steps.doppler_oci.outputs.OCI_ZEUS_TENANCY_OCID }}" >> ~/.oci/config
-      #     echo "region=${{ env.OCI_ZEUS_REGION }}" >> ~/.oci/config
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
 
-      # - name: Install OCI CLI
-      #   run: |
-      #     echo "Downloading and installing OCI CLI..."
-      #     curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh > install.sh
-      #     chmod +x install.sh
-      #     ./install.sh --accept-all-defaults
-      #     echo "$HOME/bin" >> $GITHUB_PATH
+      - name: "Authenticate to Doppler OCI Repo"
+        uses: dopplerhq/secrets-fetch-action@v1.3.0
+        id: doppler_oci
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          doppler-project: cloud-oci-creds
+          doppler-config: prd
 
-      # - name: Find The OKE Cluster ID and Private IP
-      #   id: find-cluster
-      #   run: |
-      #     echo "Searching for OKE cluster named '${{ env.OCI_CLUSTER_NAME }}'..."
+      - name: "Authenticate to Doppler Apps Repo"
+        uses: dopplerhq/secrets-fetch-action@v1.3.0
+        id: doppler_apps
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          doppler-project: apps-creds
+          doppler-config: prd
 
-      #     CLUSTER_DATA=$(oci ce cluster list \
-      #       --compartment-id ${{ steps.doppler_oci.outputs.OCI_ZEUS_COMPARTMENT_PRODUCTION_ID }} \
-      #       --lifecycle-state ACTIVE \
-      #       --all \
-      #       --query "data[?name=='${{ env.OCI_CLUSTER_NAME }}'] | [0]" \
-      #       --output json)
+      - name: "Setup OCI Config File"
+        run: |
+          mkdir -p ~/.oci
+          KEY_PATH=~/.oci/oci_api_key.pem 
 
-      #     if [ -z "$CLUSTER_DATA" ] || [ "$CLUSTER_DATA" == "null" ]; then
-      #       echo "Error: No OKE cluster named '${{ env.OCI_CLUSTER_NAME }}' found"
-      #       exit 1
-      #     fi
+          echo "${{ steps.doppler_oci.outputs.OCI_API_KEY_PRIVATE }}" > $KEY_PATH
+          chmod 600 ~/.oci/oci_api_key.pem
 
-      #     CLUSTER_ID=$(echo "$CLUSTER_DATA" | jq -r '.id')
-      #     CLUSTER_PRIVATE_IP=$(echo "$CLUSTER_DATA" | jq -r '.endpoints["private-endpoint"]' | sed 's|https://||' | sed 's|:6443||')
+          echo "[DEFAULT]" > ~/.oci/config
+          echo "user=${{ steps.doppler_oci.outputs.OCI_ZEUS_USER_OCID }}" >> ~/.oci/config
+          echo "fingerprint=${{ steps.doppler_oci.outputs.OCI_API_FINGERPRINT }}" >> ~/.oci/config
+          echo "key_file=$KEY_PATH" >> ~/.oci/config
+          echo "tenancy=${{ steps.doppler_oci.outputs.OCI_ZEUS_TENANCY_OCID }}" >> ~/.oci/config
+          echo "region=${{ env.OCI_ZEUS_REGION }}" >> ~/.oci/config
 
-      #     echo "Found OKE cluster '${{ env.OCI_CLUSTER_NAME }}'"
-      #     echo "Cluster ID: $CLUSTER_ID"
-      #     echo "Private IP: $CLUSTER_PRIVATE_IP"
+      - name: Install OCI CLI
+        run: |
+          echo "Downloading and installing OCI CLI..."   
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh > install.sh
+          chmod +x install.sh
+          ./install.sh --accept-all-defaults
+          echo "$HOME/bin" >> $GITHUB_PATH
 
-      #     echo "cluster_id=$CLUSTER_ID" >> $GITHUB_OUTPUT
-      #     echo "cluster_private_ip=$CLUSTER_PRIVATE_IP" >> $GITHUB_OUTPUT
+      - name: Find The OKE Cluster ID and Private IP
+        id: find-cluster
+        run: |
+          echo "Searching for OKE cluster named '${{ env.OCI_CLUSTER_NAME }}'..."
 
-      #     echo "::add-mask::$CLUSTER_ID"
+          CLUSTER_DATA=$(oci ce cluster list \
+            --compartment-id ${{ steps.doppler_oci.outputs.OCI_ZEUS_COMPARTMENT_PRODUCTION_ID }} \
+            --lifecycle-state ACTIVE \
+            --all \
+            --query "data[?name=='${{ env.OCI_CLUSTER_NAME }}'] | [0]" \
+            --output json)
 
-      # - name: Generate OKE Kubeconfig
-      #   run: |
-      #     echo "Generating kubeconfig for cluster..."
-      #     mkdir -p $HOME/.kube
+          if [ -z "$CLUSTER_DATA" ] || [ "$CLUSTER_DATA" == "null" ]; then
+            echo "Error: No OKE cluster named '${{ env.OCI_CLUSTER_NAME }}' found"
+            exit 1
+          fi
 
-      #     oci ce cluster create-kubeconfig \
-      #       --cluster-id ${{ steps.find-cluster.outputs.cluster_id }} \
-      #       --file $HOME/.kube/config \
-      #       --region ${{ env.OCI_ZEUS_REGION }} \
-      #       --token-version 2.0.0
+          CLUSTER_ID=$(echo "$CLUSTER_DATA" | jq -r '.id')
+          CLUSTER_PRIVATE_IP=$(echo "$CLUSTER_DATA" | jq -r '.endpoints["private-endpoint"]' | sed 's|https://||' | sed 's|:6443||')
 
-      #     echo "✓ Kubeconfig generated successfully"
+          echo "Found OKE cluster '${{ env.OCI_CLUSTER_NAME }}'"
+          echo "Cluster ID: $CLUSTER_ID"
+          echo "Private IP: $CLUSTER_PRIVATE_IP"
 
-      #     echo "Updating server URL to localhost..."
-      #     yq eval '.clusters[0].cluster.server = "https://127.0.0.1:6443"' -i $HOME/.kube/config
+          echo "cluster_id=$CLUSTER_ID" >> $GITHUB_OUTPUT
+          echo "cluster_private_ip=$CLUSTER_PRIVATE_IP" >> $GITHUB_OUTPUT
 
-      #     echo "Setting up kubeconfig permissions..."
-      #     oci setup repair-file-permissions --file /home/runner/.oci/config
+          echo "::add-mask::$CLUSTER_ID"
 
-      # - name: Export Kubeconfig as Base64
-      #   id: export-kubeconfig
-      #   run: |
-      #     KUBECONFIG_BASE64=$(cat $HOME/.kube/config | base64 -w 0)
-      #     echo "kubeconfig_base64=$KUBECONFIG_BASE64" >> $GITHUB_OUTPUT
+      - name: Generate OKE Kubeconfig
+        run: |
+          echo "Generating kubeconfig for cluster..."
+          mkdir -p $HOME/.kube
 
-  # setup-bastion-session:
-  #   needs: setup-oke-kubeconfig
-  #   uses: ./.github/workflows/oci-bstn-pf-session-finder.yml
-  #   with:
-  #     cloud_account_name: "ZEUS"
-  #     target_ssh_ip_address: ${{ needs.setup-oke-kubeconfig.outputs.cluster_private_ip }}
-  #     target_ssh_port: "6443"
-  #     target_cloud_region: "af-johannesburg-1"
-  #   secrets: inherit
+          oci ce cluster create-kubeconfig \
+            --cluster-id ${{ steps.find-cluster.outputs.cluster_id }} \
+            --file $HOME/.kube/config \
+            --region ${{ env.OCI_ZEUS_REGION }} \
+            --token-version 2.0.0
 
-  # test-cluster-connectivity:
-  #   needs: [setup-oke-kubeconfig, setup-bastion-session]
-  #   runs-on: ubuntu-latest
-  #   environment: production
+          echo "✓ Kubeconfig generated successfully"
 
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
+          echo "Updating server URL to localhost..."
+          yq eval '.clusters[0].cluster.server = "https://127.0.0.1:6443"' -i $HOME/.kube/config
 
-  #     - name: "Authenticate to Doppler OCI Repo"
-  #       uses: dopplerhq/secrets-fetch-action@v1.3.0
-  #       id: doppler_oci
-  #       with:
-  #         doppler-token: ${{ secrets.DOPPLER_TOKEN }}
-  #         doppler-project: cloud-oci-creds
-  #         doppler-config: prd
+          echo "Setting up kubeconfig permissions..."   
+          oci setup repair-file-permissions --file /home/runner/.oci/config
 
-  #     - name: Install OCI CLI
-  #       run: |
-  #         echo "Downloading and installing OCI CLI..."
-  #         curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh > install.sh
-  #         chmod +x install.sh
-  #         ./install.sh --accept-all-defaults
-  #         echo "$HOME/bin" >> $GITHUB_PATH
+      - name: Export Kubeconfig as Base64
+        id: export-kubeconfig
+        run: |
+          KUBECONFIG_BASE64=$(cat $HOME/.kube/config | base64 -w 0)
+          echo "kubeconfig_base64=$KUBECONFIG_BASE64" >> $GITHUB_OUTPUT
 
-  #     - name: Install kubectl
-  #       uses: azure/setup-kubectl@v3
-  #       with:
-  #         version: "v1.28.0"
+  setup-bastion-session:
+    needs: setup-oke-kubeconfig
+    uses: ./.github/workflows/oci-bstn-pf-session-finder.yml
+    with:
+      cloud_account_name: "ZEUS"
+      target_ssh_ip_address: ${{ needs.setup-oke-kubeconfig.outputs.cluster_private_ip }}
+      target_ssh_port: "6443"
+      target_cloud_region: "af-johannesburg-1"
+    secrets: inherit
 
-  #     - name: Restore Kubeconfig
-  #       run: |
-  #         mkdir -p $HOME/.kube
-  #         echo "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" | base64 -d > $HOME/.kube/config
-  #         chmod 600 $HOME/.kube/config
-  #         echo "✓ Kubeconfig restored"
+  test-cluster-connectivity:
+    needs: [setup-oke-kubeconfig, setup-bastion-session]
+    runs-on: ubuntu-latest
+    environment: production
 
-  #     - name: Restore Kubeconfig
-  #       run: |
-  #         mkdir -p $HOME/.kube
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  #         echo "Checking if kubeconfig_base64 output exists..."
-  #         if [ -z "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" ]; then
-  #           echo "Error: kubeconfig_base64 is empty!"
-  #           exit 1
-  #         fi
+      - name: "Authenticate to Doppler OCI Repo"
+        uses: dopplerhq/secrets-fetch-action@v1.3.0
+        id: doppler_oci
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          doppler-project: cloud-oci-creds
+          doppler-config: prd
 
-  #         echo "Decoding kubeconfig..."
-  #         echo "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" | base64 -d > $HOME/.kube/config
+      - name: "Determine Cloud Account congiurations"
+        id: get_account_config
+        run: |
+          CLOUD_ACCOUNT="${{ inputs.cloud_account_name }}"
 
-  #         echo "Checking kubeconfig file size..."
-  #         ls -lh $HOME/.kube/config
+          case "$CLOUD_ACCOUNT" in
+            "HELIOS")
+              COMPARTMENT_ID="${{ steps.doppler_oci.outputs.OCI_HELIOS_COMPARTMENT_PRODUCTION_ID }}"
+              USER_OCID="${{ steps.doppler_oci.outputs.OCI_HELIOS_USER_OCID }}"
+              TENANCY_OCID="${{ steps.doppler_oci.outputs.OCI_HELIOS_TENANCY_OCID }}"
+              REGION="af-johannesburg-1"
+              ;;
+            "ZEUS")
+              COMPARTMENT_ID="${{ steps.doppler_oci.outputs.OCI_ZEUS_COMPARTMENT_PRODUCTION_ID }}"
+              USER_OCID="${{ steps.doppler_oci.outputs.OCI_ZEUS_USER_OCID }}"
+              TENANCY_OCID="${{ steps.doppler_oci.outputs.OCI_ZEUS_TENANCY_OCID }}"
+              REGION="af-johannesburg-1"
+              ;;
+            "POSEIDON")
+              COMPARTMENT_ID="${{ steps.doppler_oci.outputs.OCI_POSEIDON_COMPARTMENT_PRODUCTION_ID }}"
+              USER_OCID="${{ steps.doppler_oci.outputs.OCI_POSEIDON_USER_OCID }}"
+              TENANCY_OCID="${{ steps.doppler_oci.outputs.OCI_POSEIDON_TENANCY_OCID }}"
+              REGION="uk-london-1"
+              ;;
+            "GAIA")
+              COMPARTMENT_ID="${{ steps.doppler_oci.outputs.OCI_GAIA_COMPARTMENT_PRODUCTION_ID }}"
+              USER_OCID="${{ steps.doppler_oci.outputs.OCI_GAIA_USER_OCID }}"
+              TENANCY_OCID="${{ steps.doppler_oci.outputs.OCI_GAIA_TENANCY_OCID }}"
+              REGION="af-johannesburg-1"
+              ;;
+            *)
+              echo "Error: Unsupported cloud account name: $CLOUD_ACCOUNT"
+              echo "Supported accounts: HELIOS, ZEUS, POSEIDON, GAIA"
+              exit 1
+              ;;
+          esac
 
-  #         if [ ! -s $HOME/.kube/config ]; then
-  #           echo "Error: Kubeconfig file is empty!"
-  #           exit 1
-  #         fi
+          # Add the compartment ID to the GitHub output
+          echo "compartment_id=$COMPARTMENT_ID" >> $GITHUB_OUTPUT
+          echo "region=$REGION" >> $GITHUB_OUTPUT
+          echo "user_ocid=$USER_OCID" >> $GITHUB_OUTPUT
+          echo "tenancy_ocid=$TENANCY_OCID" >> $GITHUB_OUTPUT
 
-  #         chmod 600 $HOME/.kube/config
+      - name: "Setup OCI Config File"
+        run: |
+          mkdir -p ~/.oci
+          KEY_PATH=~/.oci/oci_api_key.pem 
+          COMPUTE_PUBLIC_KEY_PATH=~/.oci/oci_compute_public_key.pem
 
-  #         # Set KUBECONFIG for the entire job
-  #         echo "KUBECONFIG=$HOME/.kube/config" >> $GITHUB_ENV
+          echo "${{ steps.doppler_oci.outputs.OCI_API_KEY_PRIVATE }}" > $KEY_PATH
+          echo "${{ steps.doppler_oci.outputs.OCI_COMPUTE_KEY_PUBLIC }}" > $COMPUTE_PUBLIC_KEY_PATH
 
-  #         echo "✓ Kubeconfig restored"
+          chmod 600 ~/.oci/oci_api_key.pem
+          chmod 600 ~/.oci/oci_compute_public_key.pem
 
-  #     - name: "Setup SSH Keys"
-  #       run: |
-  #         mkdir -p ~/.oci
-  #         COMPUTE_PRIVATE_KEY_PATH=~/.oci/oci_compute_private_key.pem
+          echo "[OCI-${{ inputs.cloud_account_name }}]" > ~/.oci/config
+          echo "user=${{ steps.get_account_config.outputs.user_ocid }}" >> ~/.oci/config
+          echo "fingerprint=${{ steps.doppler_oci.outputs.OCI_API_FINGERPRINT }}" >> ~/.oci/config
+          echo "key_file=$KEY_PATH" >> ~/.oci/config
+          echo "tenancy=${{ steps.get_account_config.outputs.tenancy_ocid }}" >> ~/.oci/config
+          echo "region=${{ steps.get_account_config.outputs.region }}" >> ~/.oci/config
 
-  #         echo "${{ steps.doppler_oci.outputs.OCI_COMPUTE_KEY_PRIVATE }}" > $COMPUTE_PRIVATE_KEY_PATH
 
-  #         chmod 600 ~/.oci/oci_compute_private_key.pem
+          chmod 600 ~/.oci/config
 
-  #     - name: Start Port Forward Tunnel
-  #       run: |
-  #         echo "Starting SSH port forwarding tunnel..."
+      - name: Install OCI CLI
+        run: |
+          echo "Downloading and installing OCI CLI..."   
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh > install.sh
+          chmod +x install.sh
+          ./install.sh --accept-all-defaults
+          echo "$HOME/bin" >> $GITHUB_PATH
 
-  #         ${{ needs.setup-bastion-session.outputs.ssh_command }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -N -f
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: "v1.28.0"
 
-  #         sleep 5
+      - name: Restore Kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+          echo "✓ Kubeconfig restored"
 
-  #         if nc -z 127.0.0.1 6443; then
-  #           echo "✓ Port forwarding tunnel established"
-  #         else
-  #           echo "✗ Tunnel failed"
-  #           exit 1
-  #         fi
+      - name: Restore Kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
 
-  #     - name: Test Cluster Connectivity
-  #       run: |
-  #         echo "Testing cluster connectivity..."
-  #         echo "Using kubeconfig: $KUBECONFIG"
-  #         kubectl cluster-info
-  #         kubectl get nodes
+          echo "Checking if kubeconfig_base64 output exists..."
+          if [ -z "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" ]; then
+            echo "Error: kubeconfig_base64 is empty!"
+            exit 1
+          fi
+
+          echo "Decoding kubeconfig..."
+          echo "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" | base64 -d > $HOME/.kube/config
+
+          echo "Checking kubeconfig file size..."
+          ls -lh $HOME/.kube/config
+
+          if [ ! -s $HOME/.kube/config ]; then
+            echo "Error: Kubeconfig file is empty!"
+            exit 1
+          fi
+
+          chmod 600 $HOME/.kube/config
+
+          # Set KUBECONFIG for the entire job
+          echo "KUBECONFIG=$HOME/.kube/config" >> $GITHUB_ENV
+
+          echo "✓ Kubeconfig restored"
+
+      - name: "Setup SSH Keys"
+        run: |
+          mkdir -p ~/.oci
+          COMPUTE_PRIVATE_KEY_PATH=~/.oci/oci_compute_private_key.pem
+
+          echo "${{ steps.doppler_oci.outputs.OCI_COMPUTE_KEY_PRIVATE }}" > $COMPUTE_PRIVATE_KEY_PATH
+
+          chmod 600 ~/.oci/oci_compute_private_key.pem
+
+      - name: Start Port Forward Tunnel
+        run: |
+          echo "Starting SSH port forwarding tunnel..."
+
+          ${{ needs.setup-bastion-session.outputs.ssh_command }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -N -f
+
+          sleep 5
+
+          if nc -z 127.0.0.1 6443; then
+            echo "✓ Port forwarding tunnel established"
+          else
+            echo "✗ Tunnel failed"
+            exit 1
+          fi
+
+      - name: Test Cluster Connectivity
+        run: |
+          echo "Testing cluster connectivity..."
+          echo "Using kubeconfig: $KUBECONFIG"
+          kubectl cluster-info
+          kubectl get nodes
 
   #     # - name: Apply the base config requirements
   #     #   run: |
