@@ -145,7 +145,6 @@ jobs:
         run: |
           KUBECONFIG_BASE64=$(cat $HOME/.kube/config | base64 -w 0)
           echo "kubeconfig_base64=$KUBECONFIG_BASE64" >> $GITHUB_OUTPUT
-          # echo "::add-mask::$KUBECONFIG_BASE64"
 
   setup-bastion-session:
     needs: setup-oke-kubeconfig
@@ -173,6 +172,14 @@ jobs:
           doppler-token: ${{ secrets.DOPPLER_TOKEN }}
           doppler-project: cloud-oci-creds
           doppler-config: prd
+
+      - name: Install OCI CLI
+        run: |
+          echo "Downloading and installing OCI CLI..."   
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh > install.sh
+          chmod +x install.sh
+          ./install.sh --accept-all-defaults
+          echo "$HOME/bin" >> $GITHUB_PATH
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
