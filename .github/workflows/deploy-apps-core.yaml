@@ -189,7 +189,24 @@ jobs:
       - name: Restore Kubeconfig
         run: |
           mkdir -p $HOME/.kube
+
+          echo "Checking if kubeconfig_base64 output exists..."
+          if [ -z "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" ]; then
+            echo "Error: kubeconfig_base64 is empty!"
+            exit 1
+          fi
+
+          echo "Decoding kubeconfig..."
           echo "${{ needs.setup-oke-kubeconfig.outputs.kubeconfig_base64 }}" | base64 -d > $HOME/.kube/config
+
+          echo "Checking kubeconfig file size..."
+          ls -lh $HOME/.kube/config
+
+          if [ ! -s $HOME/.kube/config ]; then
+            echo "Error: Kubeconfig file is empty!"
+            exit 1
+          fi
+
           chmod 600 $HOME/.kube/config
 
           # Set KUBECONFIG for the entire job
@@ -198,8 +215,8 @@ jobs:
           echo "✓ Kubeconfig restored"
 
           # Verify kubeconfig content
-          echo "Kubeconfig server:"
-          cat $HOME/.kube/config | grep "server:"
+          echo "Kubeconfig content:"
+          cat $HOME/.kube/config
 
       - name: Start Port Forward Tunnel
         run: |
