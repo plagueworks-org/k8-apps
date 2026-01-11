@@ -71,7 +71,8 @@ jobs:
 
       - name: "Test"
         run: |
-          ls ~/.oci
+          ls ~/.oci/keys
+          cat ~/.oci/config
 
       # - name: "Setup OCI Config File"
       #   run: |
