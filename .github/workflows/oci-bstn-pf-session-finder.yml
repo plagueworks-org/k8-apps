@@ -113,7 +113,7 @@ jobs:
           echo "${{ steps.doppler_oci.outputs.OCI_API_KEY_PRIVATE }}" > $KEY_PATH
           chmod 600 ~/.oci/oci_api_key.pem
 
-          echo "[DEFAULT]" > ~/.oci/config
+          echo "[OCI-${{ inputs.cloud_account_name }}]" > ~/.oci/config
           echo "user=${{ steps.get_account_config.outputs.user_ocid }}" >> ~/.oci/config
           echo "fingerprint=${{ steps.doppler_oci.outputs.OCI_API_FINGERPRINT }}" >> ~/.oci/config
           echo "key_file=$KEY_PATH" >> ~/.oci/config
