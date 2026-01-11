@@ -27,6 +27,7 @@ jobs:
     environment: production
     outputs:
       cluster_private_ip: ${{ steps.find-cluster.outputs.cluster_private_ip }}
+      cluster_id: ${{ steps.find-cluster.outputs.cluster_id }}
 
     steps:
       - name: Checkout code
@@ -118,40 +119,6 @@ jobs:
           echo "cluster_id=$CLUSTER_ID" >> $GITHUB_OUTPUT
           echo "cluster_private_ip=$CLUSTER_PRIVATE_IP" >> $GITHUB_OUTPUT
 
-          echo "::add-mask::$CLUSTER_ID"
-
-      - name: Generate OKE Kubeconfig
-        run: |
-          echo "Generating kubeconfig for cluster..."
-          mkdir -p $HOME/.kube
-
-          oci ce cluster create-kubeconfig \
-            --cluster-id ${{ steps.find-cluster.outputs.cluster_id }} \
-            --file $HOME/.kube/config \
-            --region ${{ env.OCI_ZEUS_REGION }} \
-            --token-version 2.0.0
-
-          echo "✓ Kubeconfig generated successfully"
-
-          echo "Updating server URL to localhost..."
-          yq eval '.clusters[0].cluster.server = "https://127.0.0.1:6443"' -i $HOME/.kube/config
-
-          echo "Setting up kubeconfig permissions..."   
-          oci setup repair-file-permissions --file /home/runner/.oci/config
-
-      - name: Export Kubeconfig as Base64
-        id: export-kubeconfig
-        run: |
-          KUBECONFIG_BASE64=$(cat $HOME/.kube/config | base64 -w 0)
-          echo "kubeconfig_base64=$KUBECONFIG_BASE64" >> $GITHUB_OUTPUT
-
-      - name: Upload Kubeconfig as Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: kubeconfig
-          path: /home/runner/.kube/config
-          retention-days: 1
-
   setup-bastion-session:
     needs: setup-oke-kubeconfig
     uses: ./.github/workflows/oci-bstn-pf-session-finder.yml
@@ -214,17 +181,24 @@ jobs:
         with:
           version: "v1.28.0"
 
-      - name: Download Kubeconfig Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: kubeconfig
-          path: $HOME/.kube/
-
-      - name: Setup Kubeconfig
+      - name: Generate OKE Kubeconfig
         run: |
-          chmod 600 $HOME/.kube/config
-          echo "KUBECONFIG=$HOME/.kube/config" >> $GITHUB_ENV
-          echo "✓ Kubeconfig restored"
+          echo "Generating kubeconfig for cluster..."
+          mkdir -p $HOME/.kube
+
+          oci ce cluster create-kubeconfig \
+            --cluster-id ${{ steps.find-cluster.outputs.cluster_id }} \
+            --file $HOME/.kube/config \
+            --region ${{ env.OCI_ZEUS_REGION }} \
+            --token-version 2.0.0
+
+          echo "✓ Kubeconfig generated successfully"
+
+          echo "Updating server URL to localhost..."
+          yq eval '.clusters[0].cluster.server = "https://127.0.0.1:6443"' -i $HOME/.kube/config
+
+          echo "Setting up kubeconfig permissions..."   
+          oci setup repair-file-permissions --file /home/runner/.oci/config
 
       - name: "Setup SSH Keys"
         run: |
@@ -257,25 +231,25 @@ jobs:
           kubectl cluster-info
           kubectl get nodes
 
-  #     # - name: Apply the base config requirements
-  #     #   run: |
+      - name: Apply the base config requirements
+        run: |
 
-  #     #     # Apply the base configs
-  #     #     kubectl apply -f apps/base
+          # Apply the base configs
+          kubectl apply -f core/base
 
-  #     # - name: Install Metrics Server API
-  #     #   run: |
-  #     #     kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/${{ env.METRICS_SERVER_VERSION }}/components.yaml
+      #     # - name: Install Metrics Server API
+      #     #   run: |
+      #     #     kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/${{ env.METRICS_SERVER_VERSION }}/components.yaml
 
-  #     # - name: Create Initial DopplerToken Generic Secret
-  #     #   run: |
+      - name: Create Initial DopplerToken Generic Secret
+        run: |
 
-  #     #     echo "Creating initial Doppler Token Secret in Default Namespace"
+          echo "Creating initial Doppler Token Secret in Default Namespace"
 
-  #     #     kubectl create secret generic doppler-token-auth-api \
-  #     #       --from-literal=dopplerToken='${{ secrets.DOPPLER_TOKEN }}' \
-  #     #       --namespace=default \
-  #     #       --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create secret generic doppler-token-auth-api \
+            --from-literal=dopplerToken='${{ secrets.DOPPLER_TOKEN }}' \
+            --namespace=default \
+            --dry-run=client -o yaml | kubectl apply -f -
 
   #     # - name: Install External Secrets Operator
   #     #   run: |
