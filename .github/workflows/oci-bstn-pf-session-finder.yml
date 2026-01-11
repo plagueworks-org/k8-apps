@@ -1,0 +1,163 @@
+name: OCI bastion Port Forwarding Session Finder
+
+on:
+  workflow_call:
+    inputs:
+      cloud_account_name:
+        description: "Cloud Account Name (e.g., HELIOS)"
+        required: true
+        type: string
+
+      target_ssh_ip_address:
+        description: "Target SSH Server IP Address (e.g., 192.168.1.1)"
+        required: true
+        type: string
+
+      target_ssh_port:
+        description: "Target SSH Port (e.g., 6443)"
+        required: true
+        type: string
+        default: "6443"
+
+      target_cloud_region:
+        description: "Target Cloud Region (e.g., af-johannesburg-1)"
+        required: true
+        type: string
+        default: "af-johannesburg-1"
+
+    outputs:
+      session_id:
+        description: "Bastion session ID"
+        value: ${{ jobs.oci-session-finder.outputs.session_id }}
+
+      ssh_command:
+        description: "SSH command for connection"
+        value: ${{ jobs.oci-session-finder.outputs.ssh_command }}
+
+    secrets:
+      DOPPLER_TOKEN:
+        description: "Doppler token for accessing secrets"
+        required: true
+
+jobs:
+  oci-session-finder:
+    name: Retrieve OCI Session ID
+    runs-on: [ubuntu-latest]
+    environment: production
+
+    outputs:
+      target_ip: ${{ steps.get_session_details.outputs.target_ip }}
+      session_id: ${{ steps.get_bastion_session_id.outputs.session_id }}
+      ssh_command: ${{ steps.get_session_details.outputs.ssh_command }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: "Authenticate to Doppler OCI Repo"
+        uses: dopplerhq/secrets-fetch-action@v1.3.0
+        id: doppler_oci
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          doppler-project: cloud-oci-creds
+          doppler-config: prd
+
+      - name: "Determine Compartment ID based on Cloud Account"
+        id: get_compartment_id
+        run: |
+          CLOUD_ACCOUNT="${{ inputs.cloud_account_name }}"
+
+          case "$CLOUD_ACCOUNT" in
+            "HELIOS")
+              COMPARTMENT_ID="${{ steps.doppler_oci.outputs.OCI_HELIOS_COMPARTMENT_PRODUCTION_ID }}"
+              ;;
+            "ZEUS")
+              COMPARTMENT_ID="${{ steps.doppler_oci.outputs.OCI_ZEUS_COMPARTMENT_PRODUCTION_ID }}"
+              ;;
+            "POSEIDON")
+              COMPARTMENT_ID="${{ steps.doppler_oci.outputs.OCI_POSEIDON_COMPARTMENT_PRODUCTION_ID }}"
+              ;;
+            "GAIA")
+              COMPARTMENT_ID="${{ steps.doppler_oci.outputs.OCI_GAIA_COMPARTMENT_PRODUCTION_ID }}"
+              ;;
+            *)
+              echo "Error: Unsupported cloud account name: $CLOUD_ACCOUNT"
+              echo "Supported accounts: HELIOS, ZEUS, POSEIDON, GAIA"
+              exit 1
+              ;;
+          esac
+
+          # Add the compartment ID to the GitHub output
+          echo "compartment_id=$COMPARTMENT_ID" >> $GITHUB_OUTPUT
+
+      - name: "Get a Bastion Host ID"
+        id: get_bastion_id
+        run: |
+          COMPARTMENT_ID="${{ steps.get_compartment_id.outputs.compartment_id }}"
+
+          ID=$(oci bastion bastion list \
+            --bastion-lifecycle-state "ACTIVE" \
+            --profile "OCI-${{ inputs.cloud_account_name }}" \
+            --compartment-id "$COMPARTMENT_ID" \
+            --all \
+            | jq -r '.data[0]["id"]')
+
+          # Echo the ID for debugging
+          echo "Found Bastion ID: $ID"
+
+          # Validate bastion ID
+          if [ -z "$ID" ] || [ "$ID" = "null" ]; then
+            echo "Error: No active bastion found in the specified compartment"
+            echo "Please verify there is an active bastion in the compartment."
+            exit 1
+          fi
+
+          # Add the ID to the GitHub output
+          echo "id=$ID" >> $GITHUB_OUTPUT
+
+      - name: "Get or Create an Active Session From Bastion"
+        id: get_bastion_session_id
+        run: |
+          EXISTING_SESSION=$(oci bastion session list --session-lifecycle-state "ACTIVE" --profile "OCI-${{ inputs.cloud_account_name }}" --bastion-id "${{ steps.get_bastion_id.outputs.id }}" | jq -r '.data[] | select(.["target-resource-details"]["target-resource-private-ip-address"] == "${{ inputs.target_ssh_ip_address }}" and .["target-resource-details"]["target-resource-port"] == "${{ inputs.target_ssh_port }}")')
+
+          if [ -z "$EXISTING_SESSION" ] || [ "$EXISTING_SESSION" = "null" ]; then
+            echo "No active session found. Creating new session..."
+            
+            # Create new session
+            NEW_SESSION=$(oci bastion session create-port-forwarding \
+              --bastion-id "${{ steps.get_bastion_id.outputs.id }}" \
+              --display-name "gha-session-pf-$(date +%s)" \
+              --ssh-public-key-file "/home/$(whoami)/.oci/keys/oci_compute_public_key.pem" \
+              --target-private-ip "${{ inputs.target_ssh_ip_address }}" \
+              --target-port "${{ inputs.target_ssh_port }}" \
+              --session-ttl 10800 \
+              --wait-for-state "SUCCEEDED" \
+              --wait-for-state "FAILED" \
+              --profile "OCI-${{ inputs.cloud_account_name }}")
+            
+            # Get the session ID from the new session
+            SESSION_ID=$(echo "$NEW_SESSION" | jq -r '.data.resources[0].identifier')
+
+            echo "Created new session: $SESSION_ID"
+          else
+            echo "Found existing active session"
+            SESSION_ID=$(echo "$EXISTING_SESSION" | jq -r '.id')
+            echo "Using existing session: $SESSION_ID"
+          fi
+
+          echo "session_id=$SESSION_ID" >> $GITHUB_OUTPUT
+
+      - name: "Get Session Details and Extract Target IP"
+        id: get_session_details
+        run: |
+          SESSION_ID="${{ steps.get_bastion_session_id.outputs.session_id }}"
+
+          # Get the full session details
+          echo "Fetching session details for: $SESSION_ID"
+          SESSION_DETAILS=$(oci bastion session get --session-id "$SESSION_ID" --profile "OCI-${{ inputs.cloud_account_name }}")
+
+          # Extract SSH command from session metadata
+          SSH_COMMAND=$(echo "$SESSION_DETAILS" | jq -r '.data["ssh-metadata"]["command"]')
+          echo "SSH Command: $SSH_COMMAND"
+
+          echo "ssh_command=$SSH_COMMAND" >> $GITHUB_OUTPUT
