@@ -92,6 +92,35 @@ jobs:
           ./install.sh --accept-all-defaults
           echo "$HOME/bin" >> $GITHUB_PATH
 
+      # - name: Find The OKE Cluster ID and Private IP
+      #   id: find-cluster
+      #   run: |
+      #     echo "Searching for OKE cluster named '${{ env.OCI_CLUSTER_NAME }}'..."
+
+      #     CLUSTER_DATA=$(oci ce cluster list \
+      #       --compartment-id ${{ steps.doppler_oci.outputs.OCI_ZEUS_COMPARTMENT_PRODUCTION_ID }} \
+      #       --lifecycle-state ACTIVE \
+      #       --all \
+      #       --query "data[?name=='${{ env.OCI_CLUSTER_NAME }}'] | [0]" \
+      #       --output json)
+
+      #     if [ -z "$CLUSTER_DATA" ] || [ "$CLUSTER_DATA" == "null" ]; then
+      #       echo "Error: No OKE cluster named '${{ env.OCI_CLUSTER_NAME }}' found"
+      #       exit 1
+      #     fi
+
+      #     CLUSTER_ID=$(echo "$CLUSTER_DATA" | jq -r '.id')
+      #     CLUSTER_PRIVATE_IP=$(echo "$CLUSTER_DATA" | jq -r '.endpoints["private-endpoint"]' | sed 's|https://||' | sed 's|:6443||')
+
+      #     echo "Found OKE cluster '${{ env.OCI_CLUSTER_NAME }}'"
+      #     echo "Cluster ID: $CLUSTER_ID"
+      #     echo "Private IP: $CLUSTER_PRIVATE_IP"
+
+      #     echo "cluster_id=$CLUSTER_ID" >> $GITHUB_OUTPUT
+      #     echo "cluster_private_ip=$CLUSTER_PRIVATE_IP" >> $GITHUB_OUTPUT
+
+      #     echo "::add-mask::$CLUSTER_ID"
+      #     echo "::add-mask::$CLUSTER_PRIVATE_IP"
       - name: Find The OKE Cluster ID and Private IP
         id: find-cluster
         run: |
@@ -104,17 +133,41 @@ jobs:
             --query "data[?name=='${{ env.OCI_CLUSTER_NAME }}'] | [0]" \
             --output json)
 
+          echo "=== DEBUG: Raw Cluster Data ==="
+          echo "$CLUSTER_DATA" | jq '.'
+          echo "==============================="
+
           if [ -z "$CLUSTER_DATA" ] || [ "$CLUSTER_DATA" == "null" ]; then
             echo "Error: No OKE cluster named '${{ env.OCI_CLUSTER_NAME }}' found"
             exit 1
           fi
 
           CLUSTER_ID=$(echo "$CLUSTER_DATA" | jq -r '.id')
-          CLUSTER_PRIVATE_IP=$(echo "$CLUSTER_DATA" | jq -r '.endpoints["private-endpoint"]' | sed 's|https://||' | sed 's|:6443||')
 
-          echo "Found OKE cluster '${{ env.OCI_CLUSTER_NAME }}'"
-          echo "Cluster ID: $CLUSTER_ID"
-          echo "Private IP: $CLUSTER_PRIVATE_IP"
+          echo "=== DEBUG: Endpoints Structure ==="
+          echo "$CLUSTER_DATA" | jq '.endpoints'
+          echo "=================================="
+
+          # Try different possible field names for the private endpoint
+          CLUSTER_PRIVATE_IP=$(echo "$CLUSTER_DATA" | jq -r '.endpoints["private-endpoint"] // .endpoints.privateEndpoint // .endpoints.private // empty' | sed 's|https://||' | sed 's|:6443||')
+
+          echo "=== DEBUG: Extraction Results ==="
+          echo "Cluster ID: '$CLUSTER_ID'"
+          echo "Private IP: '$CLUSTER_PRIVATE_IP'"
+          echo "=================================="
+
+          # Validate extractions
+          if [ -z "$CLUSTER_ID" ] || [ "$CLUSTER_ID" == "null" ]; then
+            echo "Error: Could not extract cluster ID"
+            exit 1
+          fi
+
+          if [ -z "$CLUSTER_PRIVATE_IP" ] || [ "$CLUSTER_PRIVATE_IP" == "null" ]; then
+            echo "Error: Could not extract private endpoint IP"
+            echo "Available endpoints keys:"
+            echo "$CLUSTER_DATA" | jq -r '.endpoints | keys[]'
+            exit 1
+          fi
 
           echo "cluster_id=$CLUSTER_ID" >> $GITHUB_OUTPUT
           echo "cluster_private_ip=$CLUSTER_PRIVATE_IP" >> $GITHUB_OUTPUT
