@@ -23,7 +23,7 @@ env:
 
 jobs:
   setup-oke-kubeconfig:
-    runs-on: ubuntu-latest
+    runs-on: [oke-runners]
     environment: production
     outputs:
       cluster_private_ip: ${{ steps.find-cluster.outputs.cluster_private_ip }}
