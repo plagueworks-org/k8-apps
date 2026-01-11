@@ -173,49 +173,6 @@ jobs:
           doppler-project: cloud-oci-creds
           doppler-config: prd
 
-      - name: "Determine Cloud Account congiurations"
-        id: get_account_config
-        run: |
-          CLOUD_ACCOUNT="${{ inputs.cloud_account_name }}"
-
-          case "$CLOUD_ACCOUNT" in
-            "HELIOS")
-              COMPARTMENT_ID="${{ steps.doppler_oci.outputs.OCI_HELIOS_COMPARTMENT_PRODUCTION_ID }}"
-              USER_OCID="${{ steps.doppler_oci.outputs.OCI_HELIOS_USER_OCID }}"
-              TENANCY_OCID="${{ steps.doppler_oci.outputs.OCI_HELIOS_TENANCY_OCID }}"
-              REGION="af-johannesburg-1"
-              ;;
-            "ZEUS")
-              COMPARTMENT_ID="${{ steps.doppler_oci.outputs.OCI_ZEUS_COMPARTMENT_PRODUCTION_ID }}"
-              USER_OCID="${{ steps.doppler_oci.outputs.OCI_ZEUS_USER_OCID }}"
-              TENANCY_OCID="${{ steps.doppler_oci.outputs.OCI_ZEUS_TENANCY_OCID }}"
-              REGION="af-johannesburg-1"
-              ;;
-            "POSEIDON")
-              COMPARTMENT_ID="${{ steps.doppler_oci.outputs.OCI_POSEIDON_COMPARTMENT_PRODUCTION_ID }}"
-              USER_OCID="${{ steps.doppler_oci.outputs.OCI_POSEIDON_USER_OCID }}"
-              TENANCY_OCID="${{ steps.doppler_oci.outputs.OCI_POSEIDON_TENANCY_OCID }}"
-              REGION="uk-london-1"
-              ;;
-            "GAIA")
-              COMPARTMENT_ID="${{ steps.doppler_oci.outputs.OCI_GAIA_COMPARTMENT_PRODUCTION_ID }}"
-              USER_OCID="${{ steps.doppler_oci.outputs.OCI_GAIA_USER_OCID }}"
-              TENANCY_OCID="${{ steps.doppler_oci.outputs.OCI_GAIA_TENANCY_OCID }}"
-              REGION="af-johannesburg-1"
-              ;;
-            *)
-              echo "Error: Unsupported cloud account name: $CLOUD_ACCOUNT"
-              echo "Supported accounts: HELIOS, ZEUS, POSEIDON, GAIA"
-              exit 1
-              ;;
-          esac
-
-          # Add the compartment ID to the GitHub output
-          echo "compartment_id=$COMPARTMENT_ID" >> $GITHUB_OUTPUT
-          echo "region=$REGION" >> $GITHUB_OUTPUT
-          echo "user_ocid=$USER_OCID" >> $GITHUB_OUTPUT
-          echo "tenancy_ocid=$TENANCY_OCID" >> $GITHUB_OUTPUT
-
       - name: "Setup OCI Config File"
         run: |
           mkdir -p ~/.oci
@@ -228,12 +185,12 @@ jobs:
           chmod 600 ~/.oci/oci_api_key.pem
           chmod 600 ~/.oci/oci_compute_public_key.pem
 
-          echo "[OCI-${{ inputs.cloud_account_name }}]" > ~/.oci/config
-          echo "user=${{ steps.get_account_config.outputs.user_ocid }}" >> ~/.oci/config
+          echo "[OCI-ZEUS]" > ~/.oci/config
+          echo "user=${{ steps.doppler_oci.outputs.OCI_ZEUS_USER_OCID }}" >> ~/.oci/config
           echo "fingerprint=${{ steps.doppler_oci.outputs.OCI_API_FINGERPRINT }}" >> ~/.oci/config
           echo "key_file=$KEY_PATH" >> ~/.oci/config
-          echo "tenancy=${{ steps.get_account_config.outputs.tenancy_ocid }}" >> ~/.oci/config
-          echo "region=${{ steps.get_account_config.outputs.region }}" >> ~/.oci/config
+          echo "tenancy=${{ steps.doppler_oci.outputs.OCI_ZEUS_TENANCY_OCID }}" >> ~/.oci/config
+          echo "region=${{ steps.doppler_oci.outputs.OCI_ZEUS_REGION }}" >> ~/.oci/config
 
 
           chmod 600 ~/.oci/config
