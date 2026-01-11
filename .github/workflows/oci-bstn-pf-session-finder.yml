@@ -120,6 +120,14 @@ jobs:
           echo "tenancy=${{ steps.get_account_config.outputs.tenancy_ocid }}" >> ~/.oci/config
           echo "region=${{ steps.get_account_config.outputs.region }}" >> ~/.oci/config
 
+      - name: Install OCI CLI
+        run: |
+          echo "Downloading and installing OCI CLI..."   
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh > install.sh
+          chmod +x install.sh
+          ./install.sh --accept-all-defaults
+          echo "$HOME/bin" >> $GITHUB_PATH
+
       - name: "Get a Bastion Host ID"
         id: get_bastion_id
         run: |
