@@ -166,6 +166,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: "Authenticate to Doppler OCI Repo"
+        uses: dopplerhq/secrets-fetch-action@v1.3.0
+        id: doppler_oci
+        with:
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          doppler-project: cloud-oci-creds
+          doppler-config: prd
+
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
         with:
@@ -187,12 +195,6 @@ jobs:
           echo "${{ steps.doppler_oci.outputs.OCI_COMPUTE_KEY_PRIVATE }}" > $COMPUTE_PRIVATE_KEY_PATH
 
           chmod 600 ~/.oci/oci_compute_private_key.pem
-
-      - name: Setup SSH Key for Bastion
-        run: |
-          mkdir -p ~/.ssh
-          # You'll need to set up the SSH key that was used in the bastion session
-          # This should match the public key used when creating the bastion session
 
       - name: Start Port Forward Tunnel
         run: |
