@@ -209,7 +209,4 @@ jobs:
           SSH_COMMAND=$(echo "$SSH_COMMAND" | sed "s|<privateKey>|$HOME/.oci/oci_compute_private_key.pem|g")
           SSH_COMMAND=$(echo "$SSH_COMMAND" | sed "s|<localPort>|6443|g")
 
-          echo "Original SSH Command: $(echo "$SESSION_DETAILS" | jq -r '.data["ssh-metadata"]["command"]')"
-          echo "Modified SSH Command: $SSH_COMMAND"
-
           echo "ssh_command=$SSH_COMMAND" >> $GITHUB_OUTPUT

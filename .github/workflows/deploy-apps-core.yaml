@@ -117,13 +117,11 @@ jobs:
           CLUSTER_PRIVATE_IP=$(echo "$CLUSTER_DATA" | jq -r '.endpoints["private-endpoint"]' | sed 's|https://||' | sed 's|:6443||')
 
           echo "Found OKE cluster '${{ env.OCI_CLUSTER_NAME }}'"
-          echo "Cluster ID: $CLUSTER_ID"
-          echo "Private IP: $CLUSTER_PRIVATE_IP"
 
           echo "cluster_id=$CLUSTER_ID" >> $GITHUB_OUTPUT
           echo "cluster_private_ip=$CLUSTER_PRIVATE_IP" >> $GITHUB_OUTPUT
 
-  setup-bastion-session:
+  job-setup-bastion-session:
     needs: job-get-cluster
     uses: ./.github/workflows/oci-bstn-pf-session-finder.yml
     with:
@@ -133,8 +131,8 @@ jobs:
       target_cloud_region: "af-johannesburg-1"
     secrets: inherit
 
-  deploy-apps:
-    needs: [job-get-cluster, setup-bastion-session]
+  job-deploy-apps:
+    needs: [job-get-cluster, job-setup-bastion-session]
     runs-on: ubuntu-latest
     environment: production
 
@@ -217,7 +215,7 @@ jobs:
         run: |
           echo "Starting SSH port forwarding tunnel..."
 
-          ${{ needs.setup-bastion-session.outputs.ssh_command }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -N -f
+          ${{ needs.job-setup-bastion-session.outputs.ssh_command }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -N -f
 
           sleep 5
 
