@@ -16,8 +16,8 @@
         },
         "source": {
             "path": "helm/src/mes-api",
-            "repoURL": "https://github.com/mervinhemaraju/k8-poseidon",
-            "targetRevision": "main"
+            "repoURL": "https://github.com/plagueworks-org/k8-apps",
+            "targetRevision": "feature/core-apps-setup"
         },
         "syncPolicy": {
             "automated": {
