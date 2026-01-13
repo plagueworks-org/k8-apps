@@ -11,7 +11,7 @@
     "spec": {
         "project": "default",
         "destination": {
-            "server": "https://kubernetes.default.svc",
+            "server": "zeus",
             "namespace": "uptimekuma"
         },
         "source": {
