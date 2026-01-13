@@ -1,18 +1,24 @@
+# This will create an ingressroute for
+# the traefik dashbaord. We currently 
+# do not need this so this is disabled.
 ingressRoute:
   dashboard:
-    # -- Create an IngressRoute for the dashboard
     enabled: false
 
-additionalArguments:
-  - --certificatesresolvers.le.acme.keyType=RSA2048
-  - --serversTransport.insecureSkipVerify=true
+# The update strategy of the deployment.
+# We use Recreate because oci doesn't support
+# RWX (ReadWriteMany) on PVCs.
+updateStrategy:  
+  type: Recreate
+
+
+# Environment variables
 env:
   - name: CF_DNS_API_TOKEN
     valueFrom:
+      # This is defined in the external-secrets
       secretKeyRef:
-        # Use the name defined in your es.yaml target
         name: cloudflare-creds
-        # Use the key defined in your es.yaml data
         key: CLOUDFLARE_TERRAFORM_TOKEN
 
 tlsOptions:
@@ -44,6 +50,11 @@ service:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
     external-dns.alpha.kubernetes.io/cloudflare-comment: "This is managed by ExternalDns in oke-zeus-prod-apps"
 
+
+additionalArguments:
+  - --certificatesresolvers.le.acme.keyType=RSA2048
+  - --serversTransport.insecureSkipVerify=true
+  
 persistence:
   enabled: true
   name: data
@@ -53,13 +64,17 @@ persistence:
   storageClass: "oci-bv"
   annotations: {}
 
-
 certificatesResolvers:
   le:
     acme:
       email: mervinhemaraju16@gmail.com
       dnsChallenge:
+      # also add the provider's required configuration under env
+      # or expand then from secrets/configmaps with envfrom
+      # cf. https://doc.traefik.io/traefik/https/acme/#providers
         provider: cloudflare
+      # add futher options for the dns challenge as needed
+      # cf. https://doc.traefik.io/traefik/https/acme/#dnschallenge
         resolvers:
           - 1.1.1.1
           - 8.8.8.8
@@ -68,11 +83,18 @@ certificatesResolvers:
 
 resources:
   requests:
-    cpu: "200m"
-    memory: "300Mi"
+    cpu: "100m"
+    memory: "128Mi"
   limits:
-    cpu: "300m"
-    memory: "512Mi"
+    cpu: "200m"
+    memory: "256Mi"
+
+podSecurityContext:
+  fsGroupChangePolicy: "OnRootMismatch"
+  runAsGroup: 65532
+  runAsNonRoot: true
+  runAsUser: 65532
+  fsGroup: 65532
 
 ports:
   websecure:

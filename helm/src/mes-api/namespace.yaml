@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mesapi
+  labels:
+    app: mes-api
+    category: application

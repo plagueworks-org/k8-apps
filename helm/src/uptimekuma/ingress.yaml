@@ -1,0 +1,20 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: uptime-kuma
+  namespace: uptimekuma
+  annotations:
+    external-dns.alpha.kubernetes.io/target: traefik-prod.plagueworks.org
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.alpha.kubernetes.io/cloudflare-comment: "Uptime Kuma monitoring service managed by ExternalDns in oke-prod-zeus-apps"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`uptimekuma.plagueworks.org`)
+      services:
+        - name: uptime-kuma
+          port: 3001
+  tls:
+    certResolver: le
