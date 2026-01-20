@@ -16,7 +16,7 @@ replicaCount: 1
 # Image
 image:
   repository: ghcr.io/mervinhemaraju/mauritius-emergency-service-api
-  tag: dev
+  tag: prod
   pullPolicy: Always
 
 # Container port
@@ -26,11 +26,26 @@ port: 8081
 env:
   - name: UWSGI_PROTOCOL
     value: "http"
+  - name: MAIL_USERNAME
+    value: "mervinhemaraju@gmail.com"
+  - name: MAIL_PASSWORD
+    value: ""
 
-# Deployment
-# deployment:
-#   imagePullSecrets:
-#     - name: ghcr-pull-secret
+# ConfigMap for data files
+# configMap:
+#   enabled: true
+#   filesGlob: "data/v1/*.json"
+
+# Volumes and mounts
+volumes:
+  - name: data-config
+    configMap:
+      name: mes-api-data-configmap
+
+volumeMounts:
+  - name: data-config
+    mountPath: /app/data/v1
+    readOnly: true
 
 # Health checks
 healthChecks:
@@ -72,7 +87,11 @@ service:
 # Ingress
 ingress:
   enabled: true
-  host: staging-mes.plagueworks.org
+  hosts:
+    - host: mes.mervinhemaraju.com
+    - host: mesapi.mervinhemaraju.com
+    - host: mes.plagueworks.org
+    - host: mesapi.plagueworks.org
   entryPoints:
     - websecure
   tls:

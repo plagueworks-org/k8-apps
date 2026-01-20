@@ -30,6 +30,7 @@ extraArgs:
 
 domainFilters:
   - plagueworks.org
+  - mervinhemaraju.com
 
 triggerLoopOnEvent: true
 interval: 1m
