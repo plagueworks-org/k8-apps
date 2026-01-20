@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: mesapi
+  name: wikijs
   labels:
-    app: mes-api
+    app: wikijs
     category: application

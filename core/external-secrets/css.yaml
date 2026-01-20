@@ -74,3 +74,22 @@ spec:
             namespace: default
             name: doppler-token-auth-api
             key: dopplerToken
+
+---
+# ClusterSecretStore for Koneksyon Projects
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: doppler-koneksyon-creds
+  namespace: es
+spec:
+  provider:
+    doppler:
+      project: koneksyon
+      config: prd
+      auth:
+        secretRef:
+          dopplerToken:
+            namespace: default
+            name: doppler-token-auth-api
+            key: dopplerToken

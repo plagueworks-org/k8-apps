@@ -1,0 +1,42 @@
+image:
+  repository: ghcr.io/requarks/wiki
+  tag: "2"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# External PostgreSQL configuration
+postgresql:
+  enabled: false
+  postgresqlHost: "10.18.20.10"
+  postgresqlPort: 5432
+  postgresqlDatabase: wikijs
+  postgresqlUser: wikijs
+  # Reference to existing secret for password
+  existingSecret: wikijs
+  existingSecretKey: postgresql-password
+
+siteUrl: "https://wiki.plagueworks.org"
+
+persistence:
+  enabled: false
+
+serviceAccount:
+  create: true
+  name: wikijs
+  annotations: {}

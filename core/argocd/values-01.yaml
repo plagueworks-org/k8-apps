@@ -1,0 +1,70 @@
+global:
+  domain: argocd.plagueworks.org
+
+configs:
+  params:
+    server.insecure: true
+  cm:
+    url: https://argocd.plagueworks.org
+    accounts.dke_api_user: apiKey, login
+    kustomize.buildOptions: --enable-helm
+    resource.exclusions: |
+      - apiGroups:
+          - "*"
+        kinds:
+          - VolumeSnapshot
+          - Backup
+        clusters:
+          - '*'
+  
+controller:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+server:
+  replicas: 1
+
+  resources:
+    requests:
+      cpu: 150m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+  service:
+    type: ClusterIP
+    # Ensure the service ports are explicitly defined
+    servicePortHttp: 80
+    servicePortHttps: 443
+
+  ingress:
+    enabled: false
+
+repoServer:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 150m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+dex:
+  enabled: false
+
+redis:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi

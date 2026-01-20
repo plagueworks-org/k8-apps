@@ -1,0 +1,107 @@
+githubConfigUrl: https://github.com/plagueworks-org
+githubConfigSecret: github-runner-secret
+maxRunners: 3
+minRunners: 1
+
+# Explicitly set the controller service account to avoid auto-discovery
+controllerServiceAccount:
+  namespace: github-arc
+  name: arc-controller-gha-rs-controller
+
+# Custom runner image configuration with DinD sidecar
+template:
+  spec:
+    securityContext:
+      fsGroup: 1001
+    
+    containers:
+      - name: runner
+        image: ghcr.io/mervinhemaraju/runner-image-github:latest
+        imagePullPolicy: Always
+        command:
+          - /bin/bash
+          - -c
+          - |
+            echo "Waiting for Docker daemon to be ready..."
+            for i in {1..30}; do
+              if docker info >/dev/null 2>&1; then
+                echo "Docker daemon is ready!"
+                break
+              fi
+              echo "Attempt $i: Docker daemon not ready yet, waiting..."
+              sleep 3
+            done
+            exec /home/runner/run.sh
+        env:
+          - name: DOCKER_HOST
+            value: tcp://localhost:2376
+          - name: DOCKER_TLS_CERTDIR
+            value: /certs
+          - name: DOCKER_TLS_VERIFY
+            value: "1"
+          - name: DOCKER_CERT_PATH
+            value: /certs/client
+        volumeMounts:
+          # Docker certs - mount the parent directory
+          - name: docker-certs
+            mountPath: /certs
+          # Work directory for GitHub Actions
+          - name: work
+            mountPath: /home/runner/_work
+          # OCI Config
+          - name: oci-config
+            mountPath: /home/runner/.oci/config
+            subPath: config
+            readOnly: true
+          # OCI Keys
+          - name: oci-keys
+            mountPath: /home/runner/.oci/keys
+            readOnly: true
+          # Cloudflare config
+          - name: cloudflare-config
+            mountPath: /home/runner/cloudflare/cloudflare.ini
+            subPath: ini
+            readOnly: true
+
+      # Docker-in-Docker sidecar
+      - name: dind
+        image: docker:28-dind
+        securityContext:
+          privileged: true
+        env:
+          - name: DOCKER_TLS_CERTDIR
+            value: /certs
+        volumeMounts:
+          - name: docker-certs
+            mountPath: /certs
+          - name: docker-storage
+            mountPath: /var/lib/docker
+          # Mount the work directory so containers can access workspace files
+          - name: work
+            mountPath: /home/runner/_work
+
+    volumes:
+      # Docker certificates (shared between runner and dind)
+      - name: docker-certs
+        emptyDir: {}
+      # Docker storage
+      - name: docker-storage
+        emptyDir: {}
+      # Work directory for GitHub Actions workspace
+      - name: work
+        emptyDir: {}
+      # OCI Configuration
+      - name: oci-config
+        secret:
+          secretName: runner-oci-config
+          defaultMode: 0600
+      # OCI Keys
+      - name: oci-keys
+        secret:
+          secretName: runner-oci-keys
+          defaultMode: 0600
+      # Cloudflare Configuration
+      - name: cloudflare-config
+        secret:
+          secretName: runner-cloudflare-config
+          defaultMode: 0600

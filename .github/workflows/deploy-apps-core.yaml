@@ -235,8 +235,8 @@ jobs:
       - name: Apply the base config requirements
         run: |
 
-          # Apply the base configs
-          kubectl apply -f core/base
+          # Apply the base namespace
+          kubectl apply -f core/base/namespace.yaml
 
       #     # - name: Install Metrics Server API
       #     #   run: |

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+  labels:
+    app: argocd
+    category: core
+    function: cd
+  annotations:
+    scheduler.alpha.kubernetes.io/node-selector: role=default

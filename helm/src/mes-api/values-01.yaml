@@ -1,0 +1,85 @@
+
+# App name
+name: mes-api
+
+# Namespace
+namespace:
+  create: true
+  name: mesapi
+  labels:
+    function: application
+    category: api
+
+# Replica
+replicaCount: 1
+
+# Image
+image:
+  repository: ghcr.io/mervinhemaraju/mauritius-emergency-service-api
+  tag: dev
+  pullPolicy: Always
+
+# Container port
+port: 8081
+
+# Container envs
+env:
+  - name: UWSGI_PROTOCOL
+    value: "http"
+
+# Deployment
+# deployment:
+#   imagePullSecrets:
+#     - name: ghcr-pull-secret
+
+# Health checks
+healthChecks:
+  enabled: true
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8081
+    initialDelaySeconds: 15
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8081
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Resources
+resources:
+  requests:
+    cpu: "50m"
+    memory: "64Mi"
+  limits:
+    cpu: "100m"
+    memory: "128Mi"
+
+# Service
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+  targetPort: 8081
+
+# Ingress
+ingress:
+  enabled: true
+  host: staging-mes.plagueworks.org
+  entryPoints:
+    - websecure
+  tls:
+    enabled: true
+    certResolver: le
+  externalDns:
+    enabled: true
+    target: traefik-prod.plagueworks.org
+    cloudflareProxied: "true"
+    cloudflareComment: "MES API managed by ExternalDns in oke-prod-zeus-apps"

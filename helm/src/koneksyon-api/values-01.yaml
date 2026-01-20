@@ -1,0 +1,82 @@
+
+# App name
+name: koneksyon-api
+
+# Namespace
+namespace:
+  create: true
+  name: koneksyonapi
+  labels:
+    function: application
+    category: api
+    es: ghcr
+
+# Replica
+replicaCount: 1
+
+# Image
+image:
+  repository: ghcr.io/zanbalak/koneksyon-api
+  tag: dev
+  pullPolicy: Always
+
+volumeMounts:
+  - name: appsettings-secret
+    mountPath: /app/appsettings.json  # Path to your existing file
+    subPath: KONEYKSYON_API_APPSETTINGS  # The key from your secret
+    readOnly: true
+
+volumes:
+  - name: appsettings-secret
+    secret:
+      secretName: koneksyon-api-appsettings
+      
+# Container port
+port: 8080
+
+# Container envs
+env:
+  - name: ASPNETCORE_ENVIRONMENT
+    value: "Development"
+  - name: ASPNETCORE_URLS
+    value: "http://+:8080"
+
+# Deployment
+deployment:
+  imagePullSecrets:
+    - name: ghcr-pull-secret
+
+# Health checks
+healthChecks:
+  enabled: false
+
+# Resources
+resources:
+  requests:
+    cpu: "50m"
+    memory: "64Mi"
+  limits:
+    cpu: "100m"
+    memory: "128Mi"
+
+# Service
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+# Ingress
+ingress:
+  enabled: true
+  host: koneksyon-api.plagueworks.org
+  entryPoints:
+    - websecure
+  tls:
+    enabled: true
+    certResolver: le
+  externalDns:
+    enabled: true
+    target: traefik-prod.plagueworks.org
+    cloudflareProxied: "true"
+    cloudflareComment: "Koneksyon API managed by ExternalDns in oke-prod-zeus-apps"
