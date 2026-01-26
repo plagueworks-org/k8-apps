@@ -45,6 +45,10 @@ jobs:
         needs: setup-bastion
         environment: production
         runs-on: ubuntu-latest
+
+        env:
+            DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
@@ -68,39 +72,10 @@ jobs:
               uses: mervinhemaraju/workflows/.github/actions/oci-setup@feature/setup
               with:
                   cloud_account_name: "HELIOS"
-
-            - name: Install kubectl
-              uses: azure/setup-kubectl@v3
-              with:
-                  version: "v1.28.0"
-
-            - name: Generate OKE Kubeconfig
-              run: |
-                  echo "Generating kubeconfig for cluster..."
-                  mkdir -p $HOME/.kube
-
-                  oci ce cluster create-kubeconfig \
-                      --cluster-id ${{ needs.find-cluster.outputs.cluster_id }} \
-                      --file $HOME/.kube/config \
-                      --region ${{ steps.setup_oci.outputs.region }} \
-                      --token-version 2.0.0
-
-                  echo "✓ Kubeconfig generated successfully."
-
-                  echo "Updating server URL to localhost..."
-                  yq eval '.clusters[0].cluster.server = "https://127.0.0.1:6443"' -i $HOME/.kube/config
-
-                  echo "Setting up kubeconfig permissions..."
-                  oci setup repair-file-permissions --file /home/runner/.oci/config
-
-            - name: "Setup SSH Keys"
-              run: |
-                  mkdir -p ~/.oci
-                  COMPUTE_PRIVATE_KEY_PATH=~/.oci/oci_compute_private_key.pem
-
-                  echo "${{ steps.doppler_oci.outputs.OCI_COMPUTE_KEY_PRIVATE }}" > $COMPUTE_PRIVATE_KEY_PATH
-
-                  chmod 600 ~/.oci/oci_compute_private_key.pem
+                  cluster_id: ${{ needs.find-cluster.outputs.cluster_id }}
+                  install_kubectl: "true"
+                  generate_kubeconfig: "true"
+                  setup_ssh_keys: "true"
 
             - name: Start Port Forward Tunnel
               run: |
