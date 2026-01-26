@@ -4,9 +4,9 @@ metadata:
   name: argocd-server
   namespace: argocd
   annotations:
-    external-dns.alpha.kubernetes.io/target: traefik.plagueworks.org
+    external-dns.alpha.kubernetes.io/target: traefik-mgmt.plagueworks.org
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
-    external-dns.alpha.kubernetes.io/cloudflare-comment: "Managed by ExternalDns in oke-poseidon-apps"
+    external-dns.alpha.kubernetes.io/cloudflare-comment: "Managed by ExternalDns in oke-poseidon-mgmt-apps"
 spec:
   entryPoints:
     - websecure
@@ -24,6 +24,6 @@ spec:
       services:
         - name: argocd-server
           port: 80
-          scheme: h2c # Use h2c (HTTP/2 cleartext) since server.insecure is true
+          # scheme: h2c 
   tls:
-    certResolver: le # Ensure this matches your Traefik Static Config resolver name
+    certResolver: le 
