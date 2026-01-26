@@ -25,7 +25,7 @@ jobs:
       DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
     uses: mervinhemaraju/workflows/.github/workflows/job-oci-container-get-oke.yaml@main
     with:
-      cloud_account_name: "HELIOS"
+      cloud_account_name: "POSEIDON"
       oke_cluster_name: "applications"
 
   setup-bastion:
@@ -35,7 +35,7 @@ jobs:
 
     uses: mervinhemaraju/workflows/.github/workflows/job-oci-bastions-pf-session-finder.yaml@main
     with:
-      cloud_account_name: "HELIOS"
+      cloud_account_name: "POSEIDON"
       target_ssh_ip_address: ${{ needs.find-cluster.outputs.cluster_private_ip }}
       target_ssh_port: "6443"
 
@@ -69,7 +69,7 @@ jobs:
         id: setup_oci
         uses: mervinhemaraju/workflows/.github/actions/oci-setup@main
         with:
-          cloud_account_name: "HELIOS"
+          cloud_account_name: "POSEIDON"
           cluster_id: ${{ needs.find-cluster.outputs.cluster_id }}
           install_kubectl: "true"
           generate_kubeconfig: "true"
@@ -109,4 +109,4 @@ jobs:
       - name: Deploy Core Apps
         uses: plagueworks-org/k8-apps/.github/actions/deploy-core-apps@feature/core-apps-setup
         with:
-          environment: "dev"
+          environment: "mgmt"

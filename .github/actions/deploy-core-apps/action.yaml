@@ -6,10 +6,31 @@ inputs:
     description: "Environment (e.g., prod)"
     required: true
 
+  kfiltversion:
+    description: "Kfilt version"
+    required: false
+    default: "latest"
+
+  helmversion:
+    description: "Helm version"
+    required: false
+    default: "v3.12.0"
+
 runs:
   using: "composite"
 
   steps:
+
+    - name: Install Kfilt
+      shell: bash
+      run: |
+        wget -O /usr/local/bin/kfilt https://github.com/ryane/kfilt/releases/download/v${{ inputs.kfiltversion }}/kfilt_${{ inputs.kfiltversion }}_linux_amd64
+        chmod +x /usr/local/bin/kfilt
+
+    - name: Install Helm
+      uses: azure/setup-helm@v4
+      with:
+        version: "${{ inputs.helmversion }}"
 
     # Install External Secrets Operator
     - name: Install External Secrets Operator
@@ -69,7 +90,6 @@ runs:
     - name: Install ArgoCD
       shell: bash
       working-directory: core
-      # apply inly if the directory exists
       run: |
 
           # Define main directory
