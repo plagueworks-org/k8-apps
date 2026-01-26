@@ -27,7 +27,7 @@ jobs:
         secrets:
             DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
 
-        uses: mervinhemaraju/workflows/.github/workflows/job-pf-session-finder.yaml@feature/setup
+        uses: mervinhemaraju/workflows/.github/workflows/job-oci-bastions-pf-session-finder.yaml@feature/setup
         with:
             cloud_account_name: "HELIOS"
             target_ssh_ip_address: ""
