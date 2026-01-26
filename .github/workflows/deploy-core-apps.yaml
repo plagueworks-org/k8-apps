@@ -84,7 +84,7 @@ jobs:
                       --region ${{ steps.setup_oci.outputs.region }} \
                       --token-version 2.0.0
 
-                  echo "✓ Kubeconfig generated successfully"
+                  echo "✓ Kubeconfig generated successfully."
 
                   echo "Updating server URL to localhost..."
                   yq eval '.clusters[0].cluster.server = "https://127.0.0.1:6443"' -i $HOME/.kube/config
