@@ -1,41 +1,44 @@
 name: Deploy Core Apps
 
-on:
-    push:
-        branches:
-            - main
-            - dev
-            - staging
-            - feature/*
-            - fix/*
-            - hotfix/*
-            - release/*
-        paths:
-            - "core/**"
-    pull_request:
-        branches:
-            - main
-        paths:
-            - "core/**"
-    workflow_dispatch:
+on: push
+
+# on:
+#     push:
+#         branches:
+#             - main
+#             - dev
+#             - staging
+#             - feature/*
+#             - fix/*
+#             - hotfix/*
+#             - release/*
+#         paths:
+#             - "core/**"
+#     pull_request:
+#         branches:
+#             - main
+#         paths:
+#             - "core/**"
+#     workflow_dispatch:
 
 jobs:
     setup-and-deploy:
-        uses: mervinhemaraju/workflows/.github/workflows/installation.yaml@feature/setup
+        uses: mervinhemaraju/workflows/.github/workflows/oci/bastions/job-pf-session-finder.yaml@feature/setup
         with:
             kubectl-version: "v1.28.0" # Optional: override default
             helm-version: "v3.12.0" # Optional: override default
 
-    deploy:
-        needs: setup-and-deploy
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
 
-            - name: Deploy application
-              run: |
-                  echo "Tools are now installed and ready to use"
-                  # Add your deployment steps here
-                  # kubectl apply -f ...
-                  # helm upgrade ...
+    # deploy:
+    #     needs: setup-and-deploy
+    #     runs-on: ubuntu-latest
+    #     steps:
+    #         - name: Checkout code
+    #           uses: actions/checkout@v4
+
+    #         - name: Deploy application
+    #           run: |
+    #               echo "Tools are now installed and ready to use"
+    #               # Add your deployment steps here
+    #               # kubectl apply -f ...
+    #               # helm upgrade ...
