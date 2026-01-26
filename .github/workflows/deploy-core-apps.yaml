@@ -43,6 +43,7 @@ jobs:
 
     deploy-apps:
         needs: setup-bastion
+        environment: production
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
