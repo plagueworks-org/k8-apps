@@ -31,7 +31,6 @@ jobs:
         with:
             cloud_account_name: "helios"
             target_ssh_ip_address: ""
-
     # deploy:
     #     needs: setup-and-deploy
     #     runs-on: ubuntu-latest
