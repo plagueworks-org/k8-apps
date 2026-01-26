@@ -23,6 +23,10 @@ on: push
 
 jobs:
     setup-and-deploy:
+        # Provide Doppler API key to the job
+        secrets:
+            doppler_api_key: ${{ secrets.DOPPLER_API_KEY }}
+
         uses: mervinhemaraju/workflows/.github/workflows/job-pf-session-finder.yaml@feature/setup
         with:
             cloud_account_name: "helios"
