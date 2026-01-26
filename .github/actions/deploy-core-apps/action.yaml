@@ -69,18 +69,31 @@ runs:
     - name: Install ArgoCD
       shell: bash
       working-directory: core
+      # apply inly if the directory exists
       run: |
-          cd apps/
 
-          echo "Installing ArgoCD..."
-          kubectl kustomize --enable-helm argocd/overlays/${{ inputs.environment }} > argocd-config.yaml
-          kubectl -n argocd apply -f argocd-config.yaml
+          # Define main directory
+          MAIN_D="argocd/overlays/${{ inputs.environment }}"
 
-          echo "Waiting for ArgoCD to be ready..."
-          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-server --timeout=300s
-          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-repo-server --timeout=300s
-          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-redis --timeout=300s
-          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-dex-server --timeout=300s
-          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-applicationset-controller --timeout=300s
+          if [ -d "$MAIN_D" ]; then
+              cd apps/
 
-          echo "ArgoCD installation completed"
+              echo "Installing ArgoCD..."
+              kubectl kustomize --enable-helm "$MAIN_D" > argocd-config.yaml
+              kubectl -n argocd apply -f argocd-config.yaml
+
+              echo "Waiting for ArgoCD to be ready..."
+              kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-server --timeout=300s
+              kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-repo-server --timeout=300s
+              kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-redis --timeout=300s
+              kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-dex-server --timeout=300s
+              kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-applicationset-controller --timeout=300s
+
+              echo "ArgoCD installation completed"
+          fi
+
+          else
+              echo "ArgoCD Installation skipped."
+          fi
+
+          

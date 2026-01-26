@@ -107,3 +107,8 @@ jobs:
             --from-literal=dopplerToken='${{ env.DOPPLER_TOKEN }}' \
             --namespace=default \
             --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy Core Apps
+        uses: plagueworks-org/k8-apps/.github/actions/deploy-core-apps@feature/setup
+        with:
+          environment: "dev"
