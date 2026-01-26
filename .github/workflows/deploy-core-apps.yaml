@@ -25,9 +25,7 @@ jobs:
     setup-and-deploy:
         uses: mervinhemaraju/workflows/.github/workflows/job-pf-session-finder.yaml@feature/setup
         with:
-            kubectl-version: "v1.28.0" # Optional: override default
-            helm-version: "v3.12.0" # Optional: override default
-
+            cloud_account_name: "helios"
 
     # deploy:
     #     needs: setup-and-deploy
