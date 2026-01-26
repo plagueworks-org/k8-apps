@@ -1,0 +1,39 @@
+name: "Deploy Core Apps"
+description: "Deploy core apps to the cluster."
+
+inputs:
+  environment:
+    description: "Environment (e.g., prod)"
+    required: true
+
+runs:
+  using: "composite"
+
+  steps:
+
+    # Install External Secrets Operator
+    - name: Install External Secrets Operator
+      shell: bash
+      working-directory: core
+      run: |
+        echo "Installing External Secrets..."
+        kubectl kustomize --enable-helm external-secrets/overlays/${{ inputs.environment }} > external-secrets-config.yaml
+
+        # Step 1: Apply CRDs and wait for them
+        kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl apply --server-side -f -
+        kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl wait --for=condition=established --timeout=60s -f -
+
+        # Step 2: Apply operator resources (excluding custom resources)
+        kfilt -x kind=CustomResourceDefinition -x kind=ClusterSecretStore -x kind=ClusterExternalSecret -x kind=ExternalSecret -f external-secrets-config.yaml | kubectl apply --server-side -f -
+
+        echo "Waiting for External Secrets Operator to be ready..."
+        kubectl wait --for=condition=ready pod -n es -l app.kubernetes.io/name=external-secrets --timeout=300s
+        kubectl wait --for=condition=ready pod -n es -l app.kubernetes.io/name=external-secrets-webhook --timeout=300s
+        kubectl wait --for=condition=ready pod -n es -l app.kubernetes.io/name=external-secrets-cert-controller --timeout=300s
+
+        # Step 3: Apply custom resources after operator is ready
+        kfilt -i kind=ClusterSecretStore,ClusterExternalSecret,ExternalSecret -f external-secrets-config.yaml | kubectl apply --server-side -f -
+
+        echo "External Secrets installation completed"
+
+    

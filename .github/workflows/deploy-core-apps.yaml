@@ -22,78 +22,88 @@ on: push
 #     workflow_dispatch:
 
 jobs:
-    find-cluster:
-        secrets:
-            DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
-        uses: mervinhemaraju/workflows/.github/workflows/job-oci-container-get-oke.yaml@feature/setup
+  find-cluster:
+    secrets:
+      DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+    uses: mervinhemaraju/workflows/.github/workflows/job-oci-container-get-oke.yaml@feature/setup
+    with:
+      cloud_account_name: "HELIOS"
+      oke_cluster_name: "applications"
+
+  setup-bastion:
+    needs: find-cluster
+    secrets:
+      DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+
+    uses: mervinhemaraju/workflows/.github/workflows/job-oci-bastions-pf-session-finder.yaml@feature/setup
+    with:
+      cloud_account_name: "HELIOS"
+      target_ssh_ip_address: ${{ needs.find-cluster.outputs.cluster_private_ip }}
+      target_ssh_port: "6443"
+
+  deploy-apps:
+    needs: [find-cluster, setup-bastion]
+    environment: production
+    runs-on: ubuntu-latest
+
+    env:
+      DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: "Authenticate to Doppler OCI Repo"
+        uses: dopplerhq/secrets-fetch-action@v1.3.0
+        id: doppler_oci
         with:
-            cloud_account_name: "HELIOS"
-            oke_cluster_name: "applications"
+          doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+          doppler-project: cloud-oci-creds
+          doppler-config: prd
 
-    setup-bastion:
-        needs: find-cluster
-        secrets:
-            DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+      # print bastion ssh command from setup-bastion job outputs
+      - name: Print Bastion SSH Command
+        run: |
+          echo "${{ needs.setup-bastion.outputs.ssh_command }}"
 
-        uses: mervinhemaraju/workflows/.github/workflows/job-oci-bastions-pf-session-finder.yaml@feature/setup
+      # This composite action sets up OCI CLI and creates outputs
+      - name: Setup OCI Tools
+        id: setup_oci
+        uses: mervinhemaraju/workflows/.github/actions/oci-setup@feature/setup
         with:
-            cloud_account_name: "HELIOS"
-            target_ssh_ip_address: ${{ needs.find-cluster.outputs.cluster_private_ip }}
-            target_ssh_port: "6443"
+          cloud_account_name: "HELIOS"
+          cluster_id: ${{ needs.find-cluster.outputs.cluster_id }}
+          install_kubectl: "true"
+          generate_kubeconfig: "true"
+          setup_ssh_keys: "true"
 
-    deploy-apps:
-        needs: setup-bastion
-        environment: production
-        runs-on: ubuntu-latest
+      - name: Start Port Forward Tunnel
+        run: |
+          echo "Starting SSH port forwarding tunnel..."
 
-        env:
-            DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+          ${{ needs.setup-bastion.outputs.ssh_command }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -N -f
 
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+          sleep 5
 
-            - name: "Authenticate to Doppler OCI Repo"
-              uses: dopplerhq/secrets-fetch-action@v1.3.0
-              id: doppler_oci
-              with:
-                  doppler-token: ${{ secrets.DOPPLER_TOKEN }}
-                  doppler-project: cloud-oci-creds
-                  doppler-config: prd
+          if nc -z 127.0.0.1 6443; then
+            echo "✓ Port forwarding tunnel established"
+          else
+            echo "✗ Tunnel failed"
+            exit 1
+          fi
 
-            # print bastion ssh command from setup-bastion job outputs
-            - name: Print Bastion SSH Command
-              run: |
-                  echo "${{ needs.setup-bastion.outputs.ssh_command }}"
+      - name: Test Cluster Connectivity
+        run: |
+          echo "Testing cluster connectivity..."
+          echo "Using kubeconfig: $KUBECONFIG"
+          kubectl cluster-info
 
-            # This composite action sets up OCI CLI and creates outputs
-            - name: Setup OCI Tools
-              id: setup_oci
-              uses: mervinhemaraju/workflows/.github/actions/oci-setup@feature/setup
-              with:
-                  cloud_account_name: "HELIOS"
-                  cluster_id: ${{ needs.find-cluster.outputs.cluster_id }}
-                  install_kubectl: "true"
-                  generate_kubeconfig: "true"
-                  setup_ssh_keys: "true"
+      - name: Create Initial DopplerToken Generic Secret
+        run: |
 
-            - name: Start Port Forward Tunnel
-              run: |
-                  echo "Starting SSH port forwarding tunnel..."
+          echo "Creating initial Doppler Token Secret in Default Namespace"
 
-                  ${{ needs.setup-bastion.outputs.ssh_command }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -N -f
-
-                  sleep 5
-
-                  if nc -z 127.0.0.1 6443; then
-                    echo "✓ Port forwarding tunnel established"
-                  else
-                    echo "✗ Tunnel failed"
-                    exit 1
-                  fi
-
-            - name: Test Cluster Connectivity
-              run: |
-                  echo "Testing cluster connectivity..."
-                  echo "Using kubeconfig: $KUBECONFIG"
-                  kubectl cluster-info
+          kubectl create secret generic doppler-token-auth-api \
+            --from-literal=dopplerToken='${{ env.DOPPLER_TOKEN }}' \
+            --namespace=default \
+            --dry-run=client -o yaml | kubectl apply -f -
