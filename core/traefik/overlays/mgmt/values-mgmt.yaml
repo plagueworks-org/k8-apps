@@ -1,0 +1,102 @@
+# This will create an ingressroute for
+# the traefik dashbaord. We currently 
+# do not need this so this is disabled.
+ingressRoute:
+  dashboard:
+    enabled: false
+
+# The update strategy of the deployment.
+# We use Recreate because oci doesn't support
+# RWX (ReadWriteMany) on PVCs.
+updateStrategy:  
+  type: Recreate
+
+
+# Environment variables
+env:
+  - name: CF_DNS_API_TOKEN
+    valueFrom:
+      # This is defined in the external-secrets
+      secretKeyRef:
+        name: cloudflare-creds
+        key: CLOUDFLARE_TERRAFORM_TOKEN
+
+tlsOptions:
+  default:
+    minVersion: VersionTLS12
+    cipherSuites:
+      # Recommended ciphers for TLSv1.2
+      - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+      - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+      - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+      # Recommended ciphers for TLSv1.3
+      - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+      - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+      - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
+
+service:
+  enabled: true
+  ## Single service is using `MixedProtocolLBService` feature gate.
+  ## When set to false, it will create two Service, one for TCP and one for UDP.
+  single: false
+  type: LoadBalancer
+  # Additional annotations applied to both TCP and UDP services (e.g. for cloud provider specific config)
+  annotations:
+    # Oracle Cloud Infrastructure Load Balancer annotations
+    service.beta.kubernetes.io/oci-load-balancer-shape: "flexible"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-min: "10"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-max: "10"
+    external-dns.alpha.kubernetes.io/hostname: "traefik-mgmt.plagueworks.org"
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.alpha.kubernetes.io/cloudflare-comment: "This is managed by ExternalDns in oke-poseidon-mgmt-apps"
+
+
+additionalArguments:
+  - --certificatesresolvers.le.acme.keyType=RSA2048
+  - --serversTransport.insecureSkipVerify=true
+  
+persistence:
+  enabled: true
+  name: data
+  accessMode: ReadWriteOnce
+  size: 50Gi
+  path: /data
+  storageClass: "oci-bv"
+  annotations: {}
+
+certificatesResolvers:
+  le:
+    acme:
+      email: mervinhemaraju16@gmail.com
+      dnsChallenge:
+      # also add the provider's required configuration under env
+      # or expand then from secrets/configmaps with envfrom
+      # cf. https://doc.traefik.io/traefik/https/acme/#providers
+        provider: cloudflare
+      # add futher options for the dns challenge as needed
+      # cf. https://doc.traefik.io/traefik/https/acme/#dnschallenge
+        resolvers:
+          - 1.1.1.1
+          - 8.8.8.8
+        delayBeforeCheck: 60
+      storage: /data/acme.json
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "200m"
+    memory: "256Mi"
+
+podSecurityContext:
+  fsGroupChangePolicy: "OnRootMismatch"
+  runAsGroup: 65532
+  runAsNonRoot: true
+  runAsUser: 65532
+  fsGroup: 65532
+
+ports:
+  websecure:
+    tls:
+      certResolver: "le"
