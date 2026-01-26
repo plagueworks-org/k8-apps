@@ -45,10 +45,79 @@ jobs:
         needs: setup-bastion
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout code
+            - name: Checkout repository
               uses: actions/checkout@v4
+
+            - name: "Authenticate to Doppler OCI Repo"
+              uses: dopplerhq/secrets-fetch-action@v1.3.0
+              id: doppler_oci
+              with:
+                  doppler-token: ${{ secrets.DOPPLER_TOKEN }}
+                  doppler-project: cloud-oci-creds
+                  doppler-config: prd
 
             # print bastion ssh command from setup-bastion job outputs
             - name: Print Bastion SSH Command
               run: |
                   echo "${{ needs.setup-bastion.outputs.ssh_command }}"
+
+            # This composite action sets up OCI CLI and creates outputs
+            - name: Setup OCI Tools
+              id: setup_oci
+              uses: mervinhemaraju/workflows/.github/actions/oci-setup@feature/setup
+              with:
+                  cloud_account_name: ${{ inputs.cloud_account_name }}
+
+            - name: Install kubectl
+              uses: azure/setup-kubectl@v3
+              with:
+                  version: "v1.28.0"
+
+            - name: Generate OKE Kubeconfig
+              run: |
+                  echo "Generating kubeconfig for cluster..."
+                  mkdir -p $HOME/.kube
+
+                  oci ce cluster create-kubeconfig \
+                      --cluster-id ${{ needs.find-cluster.outputs.cluster_id }} \
+                      --file $HOME/.kube/config \
+                      --region ${{ steps.setup_oci.outputs.region }} \
+                      --token-version 2.0.0
+
+                  echo "✓ Kubeconfig generated successfully"
+
+                  echo "Updating server URL to localhost..."
+                  yq eval '.clusters[0].cluster.server = "https://127.0.0.1:6443"' -i $HOME/.kube/config
+
+                  echo "Setting up kubeconfig permissions..."
+                  oci setup repair-file-permissions --file /home/runner/.oci/config
+
+            - name: "Setup SSH Keys"
+              run: |
+                  mkdir -p ~/.oci
+                  COMPUTE_PRIVATE_KEY_PATH=~/.oci/oci_compute_private_key.pem
+
+                  echo "${{ steps.doppler_oci.outputs.OCI_COMPUTE_KEY_PRIVATE }}" > $COMPUTE_PRIVATE_KEY_PATH
+
+                  chmod 600 ~/.oci/oci_compute_private_key.pem
+
+            - name: Start Port Forward Tunnel
+              run: |
+                  echo "Starting SSH port forwarding tunnel..."
+
+                  ${{ needs.setup-bastion.outputs.ssh_command }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -N -f
+
+                  sleep 5
+
+                  if nc -z 127.0.0.1 6443; then
+                    echo "✓ Port forwarding tunnel established"
+                  else
+                    echo "✗ Tunnel failed"
+                    exit 1
+                  fi
+
+            - name: Test Cluster Connectivity
+              run: |
+                  echo "Testing cluster connectivity..."
+                  echo "Using kubeconfig: $KUBECONFIG"
+                  kubectl cluster-info
