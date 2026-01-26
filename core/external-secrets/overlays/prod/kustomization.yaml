@@ -1,14 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-metadata:
-  name: external-secrets
-
-namespace: es
-
 resources:
-  - namespace.yaml
+  - ../../base
   - css.yaml
-  - ces.yaml
 
 helmCharts:
   - name: external-secrets
@@ -17,5 +11,4 @@ helmCharts:
     version: 1.2.0
     namespace: es
     includeCRDs: true
-    additionalValuesFiles:
-      - values-01.yaml
+    valuesFile: values-prod.yaml

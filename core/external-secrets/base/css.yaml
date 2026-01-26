@@ -1,0 +1,19 @@
+# > A list of all cluster stores for doppler projects
+---
+# ClusterSecretStore for Doppler Apps Creds Projects
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: doppler-apps-creds
+  namespace: es
+spec:
+  provider:
+    doppler:
+      project: apps-creds
+      config: prd
+      auth:
+        secretRef:
+          dopplerToken:
+            namespace: default
+            name: doppler-token-auth-api
+            key: dopplerToken
