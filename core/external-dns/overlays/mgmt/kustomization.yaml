@@ -1,14 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-metadata:
-  name: external-dns
-
-namespace: ed
-
 
 resources:
-  - namespace.yaml
-  - es.yaml
+  - ../../base
   
 helmCharts:
   - name: external-dns
@@ -18,4 +12,4 @@ helmCharts:
     namespace: ed
     includeCRDs: true
     additionalValuesFiles:
-      - values-01.yaml
+      - values-mgmt.yaml
