@@ -29,7 +29,7 @@ jobs:
 
         uses: mervinhemaraju/workflows/.github/workflows/job-pf-session-finder.yaml@feature/setup
         with:
-            cloud_account_name: "helios"
+            cloud_account_name: "HELIOS"
             target_ssh_ip_address: ""
     # deploy:
     #     needs: setup-and-deploy
