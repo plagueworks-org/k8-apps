@@ -25,7 +25,7 @@ jobs:
     setup-and-deploy:
         # Provide Doppler API key to the job
         secrets:
-            doppler_api_key: ${{ secrets.DOPPLER_API_KEY }}
+            DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
 
         uses: mervinhemaraju/workflows/.github/workflows/job-pf-session-finder.yaml@feature/setup
         with:
