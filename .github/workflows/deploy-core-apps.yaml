@@ -21,19 +21,14 @@ on: push
 #             - "core/**"
 #     workflow_dispatch:
 
-env:
-    CLOUD_ACCOUNT_NAME: "HELIOS"
-    OKE_CLUSTER_NAME: "applications"
-    TARGET_SSH_PORT: "6443"
-
 jobs:
     find-cluster:
         secrets:
             DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
         uses: mervinhemaraju/workflows/.github/workflows/job-oci-container-get-oke.yaml@feature/setup
         with:
-            cloud_account_name: ${{ env.CLOUD_ACCOUNT_NAME }}
-            oke_cluster_name: ${{ env.oke_cluster_name }}
+            cloud_account_name: "HELIOS"
+            oke_cluster_name: "applications"
 
     setup-bastion:
         needs: find-cluster
@@ -42,9 +37,9 @@ jobs:
 
         uses: mervinhemaraju/workflows/.github/workflows/job-oci-bastions-pf-session-finder.yaml@feature/setup
         with:
-            cloud_account_name: ${{ env.CLOUD_ACCOUNT_NAME }}
+            cloud_account_name: "HELIOS"
             target_ssh_ip_address: ${{ needs.find-cluster.outputs.cluster_private_ip }}
-            target_ssh_port: ${{ env.TARGET_SSH_PORT }}
+            target_ssh_port: "6443"
 
     deploy-apps:
         needs: setup-bastion
@@ -71,7 +66,7 @@ jobs:
               id: setup_oci
               uses: mervinhemaraju/workflows/.github/actions/oci-setup@feature/setup
               with:
-                  cloud_account_name: ${{ env.CLOUD_ACCOUNT_NAME }}
+                  cloud_account_name: "HELIOS"
 
             - name: Install kubectl
               uses: azure/setup-kubectl@v3
