@@ -23,7 +23,7 @@ on: push
 
 jobs:
     setup-and-deploy:
-        uses: mervinhemaraju/workflows/.github/workflows/oci/bastions/job-pf-session-finder.yaml@feature/setup
+        uses: mervinhemaraju/workflows/.github/workflows/job-pf-session-finder.yaml@feature/setup
         with:
             kubectl-version: "v1.28.0" # Optional: override default
             helm-version: "v3.12.0" # Optional: override default
