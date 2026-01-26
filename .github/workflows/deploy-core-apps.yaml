@@ -22,25 +22,32 @@ on: push
 #     workflow_dispatch:
 
 jobs:
-    setup-and-deploy:
-        # Provide Doppler API key to the job
+    find-cluster:
+        secrets: inherit
+        uses: mervinhemaraju/workflows/.github/workflows/job-oci-container-get-oke.yaml@feature/setup
+        with:
+            cloud_account_name: "HELIOS"
+            oke_cluster_name: "applications"
+
+    setup-bastion:
+        needs: find-cluster
         secrets:
             DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
 
         uses: mervinhemaraju/workflows/.github/workflows/job-oci-bastions-pf-session-finder.yaml@feature/setup
         with:
             cloud_account_name: "HELIOS"
-            target_ssh_ip_address: ""
-    # deploy:
-    #     needs: setup-and-deploy
-    #     runs-on: ubuntu-latest
-    #     steps:
-    #         - name: Checkout code
-    #           uses: actions/checkout@v4
+            target_ssh_ip_address: ${{ needs.find-cluster.outputs.cluster_private_ip }}
+            target_ssh_port: "6443"
 
-    #         - name: Deploy application
-    #           run: |
-    #               echo "Tools are now installed and ready to use"
-    #               # Add your deployment steps here
-    #               # kubectl apply -f ...
-    #               # helm upgrade ...
+    deploy-apps:
+        needs: setup-bastion
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            # print bastion ssh command from setup-bastion job outputs
+            - name: Print Bastion SSH Command
+              run: |
+                  echo "${{ needs.setup-bastion.outputs.ssh_command }}"
