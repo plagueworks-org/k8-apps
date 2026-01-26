@@ -23,7 +23,8 @@ on: push
 
 jobs:
     find-cluster:
-        secrets: inherit
+        secrets:
+            DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
         uses: mervinhemaraju/workflows/.github/workflows/job-oci-container-get-oke.yaml@feature/setup
         with:
             cloud_account_name: "HELIOS"
