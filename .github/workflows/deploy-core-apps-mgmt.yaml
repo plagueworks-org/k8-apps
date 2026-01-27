@@ -1,4 +1,4 @@
-name: Deploy Core Apps
+name: Deploy Core Apps to Poseidon Mgmt Cluster
 
 on:
   push:
@@ -11,12 +11,14 @@ on:
       - hotfix/*
       - release/*
     paths:
-      - "core/**"
+      - "core/*/base/**"
+      - "core/*/overlays/mgmt/**"
   pull_request:
     branches:
       - main
     paths:
-      - "core/**"
+      - "core/*/base/**"
+      - "core/*/overlays/mgmt/**"
   workflow_dispatch:
 
 jobs:

@@ -1,4 +1,4 @@
-name: Deploy Core Apps
+name: Deploy Core Apps to Helios Dev Cluster
 
 on:
   push:
@@ -11,12 +11,14 @@ on:
       - hotfix/*
       - release/*
     paths:
-      - "core/**"
+      - "core/*/base/**"
+      - "core/*/overlays/dev/**"
   pull_request:
     branches:
       - main
     paths:
-      - "core/**"
+      - "core/*/base/**"
+      - "core/*/overlays/dev/**"
   workflow_dispatch:
 
 jobs:
