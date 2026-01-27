@@ -1,0 +1,26 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: zeus-cluster
+  namespace: argocd
+spec:
+  refreshInterval: 10m
+  secretStoreRef:
+    name: doppler-cloud-oci-creds
+    kind: ClusterSecretStore
+  target:
+    name: zeus-cluster
+    creationPolicy: Owner
+    template:
+      type: Opaque
+      metadata:
+        labels:
+          argocd.argoproj.io/secret-type: cluster
+      data:
+        name: zeus
+        server: https://10.17.30.5:6443
+        config: "{{ .OKE_ZEUS_PROD_ARGOCD_MANAGER }}"
+  data:
+    - secretKey: OKE_ZEUS_PROD_ARGOCD_MANAGER
+      remoteRef:
+        key: OKE_ZEUS_PROD_ARGOCD_MANAGER

@@ -9,7 +9,7 @@ inputs:
   kfiltversion:
     description: "Kfilt version"
     required: false
-    default: "latest"
+    default: "1.0.0"
 
   helmversion:
     description: "Helm version"
@@ -31,13 +31,6 @@ runs:
       uses: azure/setup-helm@v4
       with:
         version: "${{ inputs.helmversion }}"
-
-    - name: Install Global configurations
-      shell: bash
-      working-directory: core/global
-      run: |
-        echo "Installing Global configurations..."
-        kubectl apply -f ${{ inputs.environment }}
 
     # Install External Secrets Operator
     - name: Install External Secrets Operator
@@ -122,5 +115,12 @@ runs:
           else
               echo "ArgoCD Installation skipped."
           fi
+
+    - name: Install core configurations
+      shell: bash
+      working-directory: core/configs
+      run: |
+        echo "Installing core configurations..."
+        kubectl apply -f ${{ inputs.environment }}
 
           
