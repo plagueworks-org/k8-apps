@@ -32,6 +32,13 @@ runs:
       with:
         version: "${{ inputs.helmversion }}"
 
+    - name: Install Global configurations
+      shell: bash
+      working-directory: core/global
+      run: |
+        echo "Installing Global configurations..."
+        kubectl apply -f ${{ inputs.environment }}
+
     # Install External Secrets Operator
     - name: Install External Secrets Operator
       shell: bash
