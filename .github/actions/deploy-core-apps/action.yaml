@@ -52,8 +52,8 @@ runs:
         kubectl wait --for=condition=ready pod -n es -l app.kubernetes.io/name=external-secrets-webhook --timeout=300s
         kubectl wait --for=condition=ready pod -n es -l app.kubernetes.io/name=external-secrets-cert-controller --timeout=300s
 
-        # Step 3: Apply custom resources after operator is ready
-        kfilt -i kind=ClusterSecretStore,ClusterExternalSecret,ExternalSecret -f external-secrets-config.yaml | kubectl apply --server-side -f -
+        # Step 3: Apply all resources after operator is ready
+        kubectl apply --server-side -f external-secrets-config.yaml
 
         echo "External Secrets installation completed"
     

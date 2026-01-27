@@ -24,5 +24,3 @@ spec:
     - secretKey: OKE_ZEUS_PROD_ARGOCD_MANAGER
       remoteRef:
         key: OKE_ZEUS_PROD_ARGOCD_MANAGER
-
-        
