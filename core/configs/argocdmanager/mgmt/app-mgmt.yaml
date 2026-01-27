@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/plagueworks-org/k8-apps
-    targetRevision: feature/core-apps-setup
+    targetRevision: main
     path: helm/argocd-apps/mgmt
     directory:
       recurse: true

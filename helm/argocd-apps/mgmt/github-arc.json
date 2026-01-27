@@ -16,7 +16,7 @@
         },
         "source": {
             "path": "helm/src/github/arc",
-            "repoURL": "https://github.com/mervinhemaraju/k8-poseidon",
+            "repoURL": "https://github.com/plagueworks-org/k8-apps",
             "targetRevision": "main"
         },
         "syncPolicy": {

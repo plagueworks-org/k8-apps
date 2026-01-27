@@ -111,6 +111,6 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy Core Apps
-        uses: plagueworks-org/k8-apps/.github/actions/deploy-core-apps@feature/core-apps-setup
+        uses: plagueworks-org/k8-apps/.github/actions/deploy-core-apps@main
         with:
           environment: "prod"

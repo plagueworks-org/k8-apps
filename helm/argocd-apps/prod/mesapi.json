@@ -11,13 +11,13 @@
     "spec": {
         "project": "default",
         "destination": {
-            "name": "zeus",
+            "name": "zeus-cluster",
             "namespace": "mesapi"
         },
         "source": {
             "path": "helm/src/mes-api",
             "repoURL": "https://github.com/plagueworks-org/k8-apps",
-            "targetRevision": "feature/core-apps-setup"
+            "targetRevision": "main"
         },
         "syncPolicy": {
             "automated": {
@@ -26,7 +26,8 @@
             },
             "syncOptions": [
                 "RespectIgnoreDifferences=true",
-                "ServerSideApply=true"
+                "ServerSideApply=true",
+                "Replace=true"
             ]
         }
     }
