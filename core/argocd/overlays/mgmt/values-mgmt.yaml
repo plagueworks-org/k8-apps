@@ -16,6 +16,7 @@ configs:
           - Backup
         clusters:
           - '*'
+          
   
 controller:
   replicas: 1

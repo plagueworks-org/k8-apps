@@ -34,10 +34,10 @@ runs:
 
     - name: Install External Secrets Operator
       shell: bash
-      working-directory: core
+      working-directory: core/external-secrets/overlays/${{ inputs.environment }}
       run: |
         echo "Installing External Secrets..."
-        kubectl kustomize --enable-helm external-secrets/overlays/${{ inputs.environment }} > external-secrets-config.yaml
+        kubectl kustomize --enable-helm . > external-secrets-config.yaml
 
         # Step 1: Apply CRDs and wait for them
         kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl apply --server-side -f -
@@ -58,10 +58,10 @@ runs:
     
     - name: Install Traefik
       shell: bash
-      working-directory: core
+      working-directory: core/traefik/overlays/${{ inputs.environment }}
       run: |
           echo "Installing Traefik..."
-          kubectl kustomize --enable-helm traefik/overlays/${{ inputs.environment }} > traefik-config.yaml
+          kubectl kustomize --enable-helm . > traefik-config.yaml
           kfilt -i kind=CustomResourceDefinition -f traefik-config.yaml | kubectl -n traefik apply -f -
           kfilt -i kind=CustomResourceDefinition -f traefik-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
           kubectl -n traefik apply -f traefik-config.yaml
@@ -73,10 +73,10 @@ runs:
 
     - name: Install External DNS
       shell: bash
-      working-directory: core
+      working-directory: core/external-dns/overlays/${{ inputs.environment }}
       run: |
           echo "Installing External DNS..."
-          kubectl kustomize --enable-helm external-dns/overlays/${{ inputs.environment }} > external-dns-config.yaml
+          kubectl kustomize --enable-helm . > external-dns-config.yaml
           kfilt -i kind=CustomResourceDefinition -f external-dns-config.yaml | kubectl -n ed apply -f -
           kfilt -i kind=CustomResourceDefinition -f external-dns-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
           kubectl -n ed apply -f external-dns-config.yaml
@@ -88,31 +88,28 @@ runs:
     
     - name: Install ArgoCD
       shell: bash
-      working-directory: core
+      working-directory: core/argocd/overlays/${{ inputs.environment }}
       run: |
 
-          # Define main directory
-          MAIN_D="argocd/overlays/${{ inputs.environment }}"
-
-          if [ -d "$MAIN_D" ]; then
-
-              echo "Installing ArgoCD..."
-              kubectl kustomize --enable-helm "$MAIN_D" > argocd-config.yaml
-              kubectl -n argocd apply -f argocd-config.yaml
-
-              echo "Waiting for ArgoCD to be ready..."
-              kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-server --timeout=300s
-              kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-repo-server --timeout=300s
-              kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-redis --timeout=300s
-              kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-dex-server --timeout=300s
-              kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-applicationset-controller --timeout=300s
-
-              echo "ArgoCD installation completed"
+          # Check if current directory has yaml, yml or json files. 
+          # If not, skip
+          if [ -z "$(find . -maxdepth 1 -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \))" ]; then
+              echo "No configuration files found for environment ${{ inputs.environment }}. Skipping ArgoCD installation..."
+              exit 0
           fi
+          
+          echo "Installing ArgoCD..."
+          kubectl kustomize --enable-helm . > argocd-config.yaml
+          kubectl -n argocd apply -f argocd-config.yaml
 
-          else
-              echo "ArgoCD Installation skipped."
-          fi
+          echo "Waiting for ArgoCD to be ready..."
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-server --timeout=300s
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-repo-server --timeout=300s
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-redis --timeout=300s
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-dex-server --timeout=300s
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-applicationset-controller --timeout=300s
+
+          echo "ArgoCD installation completed"
 
     - name: Install ArgoCD Manager Configurations
       shell: bash
@@ -122,12 +119,11 @@ runs:
         # Check if current directory has yaml, yml or json files. 
         # If not, skip
         if [ -z "$(find . -maxdepth 1 -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \))" ]; then
-            echo "No configuration files found for env ${{ inputs.environment }}. Skipping..."
+            echo "No configuration files found for environment ${{ inputs.environment }}. Skipping ArgoCD Manager configuration..."
             exit 0
         fi
 
         echo "Installing ArgoCD Manager Configurations..."
-        
         kubectl apply -f .
 
           
