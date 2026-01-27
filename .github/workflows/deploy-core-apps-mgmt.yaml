@@ -13,14 +13,14 @@ on:
     paths:
       - "core/*/base/**"
       - "core/*/overlays/mgmt/**"
-      - "core/global/mgmt/**"
+      - "core/configs/**/mgmt/**"
   pull_request:
     branches:
       - main
     paths:
       - "core/*/base/**"
       - "core/*/overlays/mgmt/**"
-      - "core/global/mgmt/**"
+      - "core/configs/**/mgmt/**"
   workflow_dispatch:
 
 jobs:
