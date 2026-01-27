@@ -7,7 +7,7 @@ resources:
 helmCharts:
   - name: plagueworks-k8-standard-charts
     repo: oci://ghcr.io/mervinhemaraju
-    version: "1.2.0-2f7e14e"
+    version: "1.2.0"
     releaseName: mes-api
     namespace: mesapi
     additionalValuesFiles:
