@@ -9,7 +9,7 @@ inputs:
   kfiltversion:
     description: "Kfilt version"
     required: false
-    default: "1.0.0"
+    default: "0.0.8"
 
   helmversion:
     description: "Helm version"
@@ -21,10 +21,11 @@ runs:
 
   steps:
 
+    
     - name: Install Kfilt
       shell: bash
       run: |
-        wget -O /usr/local/bin/kfilt https://github.com/ryane/kfilt/releases/download/v${{ inputs.kfiltversion }}/kfilt_${{ inputs.kfiltversion }}_linux_amd64
+        wget -O /usr/local/bin/kfilt https://github.com/ryane/kfilt/releases/download/v${inputs.kfiltversion}/kfilt_${inputs.kfiltversion}_linux_amd64
         chmod +x /usr/local/bin/kfilt
 
     - name: Install Helm
