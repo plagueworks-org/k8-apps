@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: github-arc
+  labels:
+    app: github-arc
+    category: application
+    sub-category: github-runners

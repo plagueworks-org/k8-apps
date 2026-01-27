@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: github-runners
 
 resources:
+  - namespace.yaml
   - es.yaml
   - mounted-secrets.yaml
 
