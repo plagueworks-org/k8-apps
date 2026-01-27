@@ -1,0 +1,29 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: argocd-server
+  namespace: argocd
+  annotations:
+    external-dns.alpha.kubernetes.io/target: traefik-mgmt.plagueworks.org
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    external-dns.alpha.kubernetes.io/cloudflare-comment: "Managed by ExternalDns in oke-poseidon-mgmt-apps"
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    # Standard Web UI Traffic
+    - kind: Rule
+      match: Host(`argocd.plagueworks.org`)
+      services:
+        - name: argocd-server
+          port: 80
+    # gRPC Traffic for ArgoCD CLI
+    - kind: Rule
+      match: Host(`argocd.plagueworks.org`) && Header(`Content-Type`, `application/grpc`)
+      priority: 11
+      services:
+        - name: argocd-server
+          port: 80
+          # scheme: h2c 
+  tls:
+    certResolver: le 

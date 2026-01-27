@@ -1,0 +1,20 @@
+# Resource limits
+resources:
+  requests:
+    cpu: "50m"
+    memory: "64Mi"
+
+webhook:
+  create: true
+
+  resources:
+    requests:
+      cpu: "75m"
+      memory: "64Mi"
+
+certController:
+  create: true
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"

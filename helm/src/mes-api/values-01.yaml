@@ -1,0 +1,104 @@
+
+# App name
+name: mes-api
+
+# Namespace
+namespace:
+  create: true
+  name: mesapi
+  labels:
+    function: application
+    category: api
+
+# Replica
+replicaCount: 1
+
+# Image
+image:
+  repository: ghcr.io/mervinhemaraju/mauritius-emergency-service-api
+  tag: prod
+  pullPolicy: Always
+
+# Container port
+port: 8081
+
+# Container envs
+env:
+  - name: UWSGI_PROTOCOL
+    value: "http"
+  - name: MAIL_USERNAME
+    value: "mervinhemaraju@gmail.com"
+  - name: MAIL_PASSWORD
+    value: ""
+
+# ConfigMap for data files
+# configMap:
+#   enabled: true
+#   filesGlob: "data/v1/*.json"
+
+# Volumes and mounts
+volumes:
+  - name: data-config
+    configMap:
+      name: mes-api-data-configmap
+
+volumeMounts:
+  - name: data-config
+    mountPath: /app/data/v1
+    readOnly: true
+
+# Health checks
+healthChecks:
+  enabled: true
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8081
+    initialDelaySeconds: 15
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 3
+  
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8081
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Resources
+resources:
+  requests:
+    cpu: "50m"
+    memory: "64Mi"
+  limits:
+    cpu: "100m"
+    memory: "128Mi"
+
+# Service
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+  targetPort: 8081
+
+# Ingress
+ingress:
+  enabled: true
+  hosts:
+    - host: mes.mervinhemaraju.com
+    - host: mesapi.mervinhemaraju.com
+    - host: mes.plagueworks.org
+    - host: mesapi.plagueworks.org
+  entryPoints:
+    - websecure
+  tls:
+    enabled: true
+    certResolver: le
+  externalDns:
+    enabled: true
+    target: traefik-prod.plagueworks.org
+    cloudflareProxied: "true"
+    cloudflareComment: "MES API managed by ExternalDns in oke-prod-zeus-apps"

@@ -1,0 +1,21 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: wikijs
+  namespace: wikijs
+spec:
+  secretStoreRef:
+    name: doppler-apps-creds
+    kind: ClusterSecretStore
+
+  target:
+    name: wikijs
+    creationPolicy: Owner
+
+  data:
+    - secretKey: postgresql-password
+      remoteRef:
+        key: WIKIJS_DB_PASSWORD
+        conversionStrategy: Default
+        decodingStrategy: None
+        metadataPolicy: None

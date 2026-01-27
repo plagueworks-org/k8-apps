@@ -1,0 +1,26 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: github-runner-secret
+  namespace: github-runners
+spec:
+
+  # Reference to the ClusterSecretStore
+  secretStoreRef:
+    name: doppler-apps-creds
+    kind: ClusterSecretStore
+
+  target:
+    name: github-runner-secret
+    creationPolicy: Owner
+
+  data:
+    - secretKey: github_app_id
+      remoteRef:
+        key: GH_APP_OKERUNNERS_ID
+    - secretKey: github_app_installation_id
+      remoteRef:
+        key: GH_APP_OKERUNNERS_INSTALLATION_ID
+    - secretKey: github_app_private_key
+      remoteRef:
+        key: GH_APP_OKERUNNERS_KEY_PRIVATE

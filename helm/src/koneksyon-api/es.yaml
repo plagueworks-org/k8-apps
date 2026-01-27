@@ -1,0 +1,24 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: koneksyon-api-appsettings-token
+  namespace: koneksyonapi
+spec:
+  # Reference to the ClusterSecretStore
+  secretStoreRef:
+    name: doppler-koneksyon-creds
+    kind: ClusterSecretStore
+
+  # Describes the Kubernetes Secret that will be created
+  target:
+    name: koneksyon-api-appsettings      # Name of the Kubernetes Secret to be created
+    creationPolicy: Owner       # The secret will be deleted when this ExternalSecret is deleted
+
+  # Describes the data to fetch from Doppler
+  data:
+  - secretKey: KONEYKSYON_API_APPSETTINGS
+    remoteRef:
+      key: KONEYKSYON_API_APPSETTINGS
+      conversionStrategy: Default	
+      decodingStrategy: None
+      metadataPolicy: None

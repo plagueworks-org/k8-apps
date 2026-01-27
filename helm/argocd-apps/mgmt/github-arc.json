@@ -1,0 +1,33 @@
+{
+    "apiVersion": "argoproj.io/v1alpha1",
+    "kind": "Application",
+    "metadata": {
+        "name": "github-arc",
+        "namespace": "argocd",
+        "finalizers": [
+            "resources-finalizer.argocd.argoproj.io"
+        ]
+    },
+    "spec": {
+        "project": "default",
+        "destination": {
+            "server": "https://kubernetes.default.svc",
+            "namespace": "github-arc"
+        },
+        "source": {
+            "path": "helm/src/github/arc",
+            "repoURL": "https://github.com/plagueworks-org/k8-apps",
+            "targetRevision": "main"
+        },
+        "syncPolicy": {
+            "automated": {
+                "prune": true
+            },
+            "syncOptions": [
+                "RespectIgnoreDifferences=true",
+                "ServerSideApply=true",
+                "Replace=true"
+            ]
+        }
+    }
+}

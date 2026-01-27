@@ -1,0 +1,24 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: uptimekuma-token
+  namespace: uptimekuma
+spec:
+  # Reference to the ClusterSecretStore
+  secretStoreRef:
+    name: doppler-apps-creds
+    kind: ClusterSecretStore
+
+  # Describes the Kubernetes Secret that will be created
+  target:
+    name: uptimekuma-creds      # Name of the Kubernetes Secret to be created
+    creationPolicy: Owner       # The secret will be deleted when this ExternalSecret is deleted
+
+  # Describes the data to fetch from Doppler
+  data:
+  - secretKey: UPTIMEKUMA_ADMIN_PASSWORD
+    remoteRef:
+      key: UPTIMEKUMA_ADMIN_PASSWORD
+      conversionStrategy: Default	
+      decodingStrategy: None
+      metadataPolicy: None

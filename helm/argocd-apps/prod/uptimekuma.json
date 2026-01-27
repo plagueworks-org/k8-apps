@@ -1,0 +1,33 @@
+{
+    "apiVersion": "argoproj.io/v1alpha1",
+    "kind": "Application",
+    "metadata": {
+        "name": "uptimekuma",
+        "namespace": "argocd",
+        "finalizers": [
+            "resources-finalizer.argocd.argoproj.io"
+        ]
+    },
+    "spec": {
+        "project": "default",
+        "destination": {
+            "name": "zeus",
+            "namespace": "uptimekuma"
+        },
+        "source": {
+            "path": "helm/src/uptimekuma",
+            "repoURL": "https://github.com/plagueworks-org/k8-apps",
+            "targetRevision": "main"
+        },
+        "syncPolicy": {
+            "automated": {
+                "prune": true,
+                "selfHeal": true
+            },
+            "syncOptions": [
+                "RespectIgnoreDifferences=true",
+                "ServerSideApply=true"
+            ]
+        }
+    }
+}

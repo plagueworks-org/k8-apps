@@ -1,0 +1,129 @@
+name: "Deploy Core Apps"
+description: "Deploy core apps to the cluster."
+
+inputs:
+  environment:
+    description: "Environment (e.g., prod)"
+    required: true
+
+  kfiltversion:
+    description: "Kfilt version"
+    required: false
+    default: "0.0.8"
+
+  helmversion:
+    description: "Helm version"
+    required: false
+    default: "v3.12.0"
+
+runs:
+  using: "composite"
+
+  steps:
+
+    - name: Install Kfilt
+      shell: bash
+      run: |
+        wget -O /usr/local/bin/kfilt https://github.com/ryane/kfilt/releases/download/v${{ inputs.kfiltversion }}/kfilt_${{ inputs.kfiltversion }}_linux_amd64
+        chmod +x /usr/local/bin/kfilt
+
+    - name: Install Helm
+      uses: azure/setup-helm@v4
+      with:
+        version: "${{ inputs.helmversion }}"
+
+    - name: Install External Secrets Operator
+      shell: bash
+      working-directory: core/external-secrets/overlays/${{ inputs.environment }}
+      run: |
+        echo "Installing External Secrets..."
+        kubectl kustomize --enable-helm . > external-secrets-config.yaml
+
+        # Step 1: Apply CRDs and wait for them
+        kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl apply --server-side -f -
+        kfilt -i kind=CustomResourceDefinition -f external-secrets-config.yaml | kubectl wait --for=condition=established --timeout=60s -f -
+
+        # Step 2: Apply operator resources (excluding custom resources)
+        kfilt -x kind=CustomResourceDefinition -x kind=ClusterSecretStore -x kind=ClusterExternalSecret -x kind=ExternalSecret -f external-secrets-config.yaml | kubectl apply --server-side -f -
+
+        echo "Waiting for External Secrets Operator to be ready..."
+        kubectl wait --for=condition=ready pod -n es -l app.kubernetes.io/name=external-secrets --timeout=300s
+        kubectl wait --for=condition=ready pod -n es -l app.kubernetes.io/name=external-secrets-webhook --timeout=300s
+        kubectl wait --for=condition=ready pod -n es -l app.kubernetes.io/name=external-secrets-cert-controller --timeout=300s
+
+        # Step 3: Apply all resources after operator is ready
+        kubectl apply --server-side -f external-secrets-config.yaml
+
+        echo "External Secrets installation completed"
+    
+    - name: Install Traefik
+      shell: bash
+      working-directory: core/traefik/overlays/${{ inputs.environment }}
+      run: |
+          echo "Installing Traefik..."
+          kubectl kustomize --enable-helm . > traefik-config.yaml
+          kfilt -i kind=CustomResourceDefinition -f traefik-config.yaml | kubectl -n traefik apply -f -
+          kfilt -i kind=CustomResourceDefinition -f traefik-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
+          kubectl -n traefik apply -f traefik-config.yaml
+
+          echo "Waiting for Traefik to be ready..."
+          kubectl wait --for=condition=ready pod -n traefik -l app.kubernetes.io/name=traefik --timeout=300s
+
+          echo "Traefik installation completed"
+
+    - name: Install External DNS
+      shell: bash
+      working-directory: core/external-dns/overlays/${{ inputs.environment }}
+      run: |
+          echo "Installing External DNS..."
+          kubectl kustomize --enable-helm . > external-dns-config.yaml
+          kfilt -i kind=CustomResourceDefinition -f external-dns-config.yaml | kubectl -n ed apply -f -
+          kfilt -i kind=CustomResourceDefinition -f external-dns-config.yaml | kubectl wait --for condition=established --timeout=60s -f -
+          kubectl -n ed apply -f external-dns-config.yaml
+
+          echo "Waiting for External DNS to be ready..."
+          kubectl wait --for=condition=ready pod -n ed -l app.kubernetes.io/name=external-dns --timeout=300s
+
+          echo "External DNS installation completed"
+    
+    - name: Install ArgoCD
+      shell: bash
+      working-directory: core/argocd/overlays/${{ inputs.environment }}
+      run: |
+
+          # Check if current directory has yaml, yml or json files. 
+          # If not, skip
+          if [ -z "$(find . -maxdepth 1 -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \))" ]; then
+              echo "No configuration files found for environment ${{ inputs.environment }}. Skipping ArgoCD installation..."
+              exit 0
+          fi
+          
+          echo "Installing ArgoCD..."
+          kubectl kustomize --enable-helm . > argocd-config.yaml
+          kubectl -n argocd apply -f argocd-config.yaml
+
+          echo "Waiting for ArgoCD to be ready..."
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-server --timeout=300s
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-repo-server --timeout=300s
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-redis --timeout=300s
+          # kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-dex-server --timeout=300s
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-applicationset-controller --timeout=300s
+
+          echo "ArgoCD installation completed"
+
+    - name: Install ArgoCD Manager Configurations
+      shell: bash
+      working-directory: core/configs/argocdmanager/${{ inputs.environment }}
+      run: |
+
+        # Check if current directory has yaml, yml or json files. 
+        # If not, skip
+        if [ -z "$(find . -maxdepth 1 -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \))" ]; then
+            echo "No configuration files found for environment ${{ inputs.environment }}. Skipping ArgoCD Manager configuration..."
+            exit 0
+        fi
+
+        echo "Installing ArgoCD Manager Configurations..."
+        kubectl apply -f .
+
+          

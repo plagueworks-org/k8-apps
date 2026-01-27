@@ -1,0 +1,76 @@
+
+---
+# ClusterSecretStore for Doppler Auth0 Creds Projects
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: doppler-auth0-creds
+  namespace: es
+spec:
+  provider:
+    doppler:
+      project: auth0-creds
+      config: prd
+      auth:
+        secretRef:
+          dopplerToken:
+            namespace: default
+            name: doppler-token-auth-api
+            key: dopplerToken
+
+---
+# ClusterSecretStore for Doppler Cloud Azre Creds Projects
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: doppler-cloud-azure-creds
+  namespace: es
+spec:
+  provider:
+    doppler:
+      project: cloud-azure-creds
+      config: prd
+      auth:
+        secretRef:
+          dopplerToken:
+            namespace: default
+            name: doppler-token-auth-api
+            key: dopplerToken
+
+---
+# ClusterSecretStore for Cloud OCI Creds Projects
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: doppler-cloud-oci-creds
+  namespace: es
+spec:
+  provider:
+    doppler:
+      project: cloud-oci-creds
+      config: prd
+      auth:
+        secretRef:
+          dopplerToken:
+            namespace: default
+            name: doppler-token-auth-api
+            key: dopplerToken
+
+---
+# ClusterSecretStore for Koneksyon Projects
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: doppler-koneksyon-creds
+  namespace: es
+spec:
+  provider:
+    doppler:
+      project: koneksyon
+      config: prd
+      auth:
+        secretRef:
+          dopplerToken:
+            namespace: default
+            name: doppler-token-auth-api
+            key: dopplerToken

@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: uptime-kuma
+
+namespace: uptimekuma
+
+resources:
+  - namespace.yaml
+  - ingress.yaml
+  - es.yaml
+
+helmCharts:
+  - name: uptime-kuma
+    repo: https://dirsigler.github.io/uptime-kuma-helm
+    releaseName: uptime-kuma
+    version: 2.22.0
+    namespace: uptimekuma
+    includeCRDs: true
+    additionalValuesFiles:
+      - values-01.yaml
