@@ -96,8 +96,7 @@ runs:
           MAIN_D="argocd/overlays/${{ inputs.environment }}"
 
           if [ -d "$MAIN_D" ]; then
-              cd apps/
-
+          
               echo "Installing ArgoCD..."
               kubectl kustomize --enable-helm "$MAIN_D" > argocd-config.yaml
               kubectl -n argocd apply -f argocd-config.yaml
