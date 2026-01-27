@@ -1,7 +1,7 @@
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: zeus-cluster
+  name: zeus
   namespace: argocd
 spec:
   refreshInterval: 10m
@@ -9,7 +9,7 @@ spec:
     name: doppler-cloud-oci-creds
     kind: ClusterSecretStore
   target:
-    name: zeus-cluster
+    name: zeus
     creationPolicy: Owner
     template:
       type: Opaque

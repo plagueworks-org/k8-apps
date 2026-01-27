@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - css.yaml
 
 helmCharts:
   - name: external-secrets
