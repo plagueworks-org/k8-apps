@@ -21,7 +21,6 @@ runs:
 
   steps:
 
-    
     - name: Install Kfilt
       shell: bash
       run: |
