@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: plagueworks-applications
+  name: cluster-poseidon-mgmt-apps
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/plagueworks-org/k8-apps
     targetRevision: feature/core-apps-setup
-    path: helm/argocd-apps/prod
+    path: helm/argocd-apps/mgmt
     directory:
       recurse: true
   destination:

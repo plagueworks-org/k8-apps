@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: plagueworks-applications
+  name: cluster-zeus-prod-apps
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/plagueworks-org/k8-apps
     targetRevision: feature/core-apps-setup
-    path: helm/argocd-apps/mgmt
+    path: helm/argocd-apps/prod
     directory:
       recurse: true
   destination:
@@ -19,9 +19,3 @@ spec:
   syncPolicy:
     syncOptions:
       - PruneLast=true
-    retry:
-      limit: 2
-      backoff:
-        duration: 30s
-        factor: 2
-        maxDuration: 3m0s

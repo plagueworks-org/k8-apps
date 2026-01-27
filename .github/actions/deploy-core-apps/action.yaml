@@ -32,7 +32,6 @@ runs:
       with:
         version: "${{ inputs.helmversion }}"
 
-    # Install External Secrets Operator
     - name: Install External Secrets Operator
       shell: bash
       working-directory: core
@@ -96,7 +95,7 @@ runs:
           MAIN_D="argocd/overlays/${{ inputs.environment }}"
 
           if [ -d "$MAIN_D" ]; then
-          
+
               echo "Installing ArgoCD..."
               kubectl kustomize --enable-helm "$MAIN_D" > argocd-config.yaml
               kubectl -n argocd apply -f argocd-config.yaml
@@ -115,11 +114,20 @@ runs:
               echo "ArgoCD Installation skipped."
           fi
 
-    - name: Install core configurations
+    - name: Install ArgoCD Manager Configurations
       shell: bash
-      working-directory: core/configs
+      working-directory: core/configs/argocdmanager/${{ inputs.environment }}
       run: |
-        echo "Installing core configurations..."
-        kubectl apply -f ${{ inputs.environment }}
+
+        # Check if current directory has yaml, yml or json files. 
+        # If not, skip
+        if [ -z "$(find . -maxdepth 1 -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*.json" \))" ]; then
+            echo "No configuration files found for env ${{ inputs.environment }}. Skipping..."
+            exit 0
+        fi
+
+        echo "Installing ArgoCD Manager Configurations..."
+        
+        kubectl apply -f .
 
           
