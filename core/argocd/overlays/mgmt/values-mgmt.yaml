@@ -3,7 +3,7 @@ global:
 
 configs:
   params:
-    server.insecure: true
+    server.insecure: false
   cm:
     url: https://argocd.plagueworks.org
     accounts.dke_api_user: apiKey, login
