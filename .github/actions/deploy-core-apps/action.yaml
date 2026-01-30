@@ -106,7 +106,7 @@ runs:
           kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-server --timeout=300s
           kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-repo-server --timeout=300s
           kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-redis --timeout=300s
-          # kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-dex-server --timeout=300s
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-dex-server --timeout=300s
           kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-applicationset-controller --timeout=300s
 
           echo "ArgoCD installation completed"

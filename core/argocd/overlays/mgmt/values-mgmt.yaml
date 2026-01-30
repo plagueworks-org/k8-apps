@@ -16,6 +16,57 @@ configs:
           - Backup
         clusters:
           - '*'
+
+    # Enable Dex for OIDC
+    dex.config: |
+      connectors:
+        # Auth0 OIDC Connector
+        - type: oidc
+          id: auth0
+          name: Auth0
+          config:
+            issuer: $dex.auth0.domain
+            clientID: $dex.auth0.clientId
+            clientSecret: $dex.auth0.clientSecret
+            redirectURI: https://argocd.plagueworks.org/api/dex/callback
+            scopes:
+              - openid
+              - profile
+              - email
+            insecureEnableGroups: true
+            getUserInfo: true
+
+        # Azure Entra ID (Azure AD) OIDC Connector
+        - type: microsoft
+          id: azure
+          name: Azure Entra
+          config:
+            clientID: $dex.azure.clientId
+            clientSecret: $dex.azure.clientSecret
+            tenant: $dex.azure.tenantId
+            redirectURI: https://argocd.plagueworks.org/api/dex/callback
+            scopes:
+              - openid
+              - profile
+              - email
+
+  # RBAC Configuration - Grant admin to specific users
+  rbac:
+    policy.csv: |
+      # Auth0 user - using email as identifier
+      g, mervinhemaraju16@gmail.com, role:admin
+      
+      # Azure Entra user - using email/UPN as identifier
+      g, mervin16@plagueworks.org, role:admin
+      
+      # Alternative: if connectors return different subject formats
+      # Auth0 might return the username
+      g, th3pl4gu3, role:admin
+    
+    policy.default: role:readonly
+    scopes: '[groups, email]'
+
+
   
 controller:
   replicas: 1
@@ -58,7 +109,14 @@ repoServer:
       memory: 256Mi
 
 dex:
-  enabled: false
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 
 redis:
   resources:
