@@ -56,7 +56,16 @@ nodeSelector: {}
 tolerations: []
 
 # Affinity
-affinity: {}
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+            - key: "node-pool"
+              operator: In
+              values:
+                - default-pool
 
 # Replica count
 replicaCount: 1

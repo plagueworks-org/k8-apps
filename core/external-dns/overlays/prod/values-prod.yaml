@@ -42,3 +42,15 @@ resources:
   requests:
     cpu: "50m"
     memory: "64Mi"
+
+# Affinity
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+            - key: "node-pool"
+              operator: In
+              values:
+                - default-pool
