@@ -53,11 +53,11 @@ healthChecks:
 # Resources
 resources:
   requests:
-    cpu: "50m"
-    memory: "64Mi"
-  limits:
-    cpu: "100m"
+    cpu: "250m"
     memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "256Mi"
 
 # Service
 service:
@@ -88,4 +88,4 @@ nodeAffinity:
     - key: node-pool
       operator: In
       values:
-        - default-pool
+        - large-pool
