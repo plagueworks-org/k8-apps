@@ -16,3 +16,40 @@ spec:
             namespace: default
             name: doppler-token-auth-api
             key: dopplerToken
+---
+# ClusterSecretStore for Doppler Auth0 Creds Projects
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: doppler-auth0-creds
+  namespace: es
+spec:
+  provider:
+    doppler:
+      project: auth0-creds
+      config: prd
+      auth:
+        secretRef:
+          dopplerToken:
+            namespace: default
+            name: doppler-token-auth-api
+            key: dopplerToken
+
+---
+# ClusterSecretStore for Doppler Cloud Azure Creds Projects
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: doppler-cloud-azure-creds
+  namespace: es
+spec:
+  provider:
+    doppler:
+      project: cloud-azure-creds
+      config: prd
+      auth:
+        secretRef:
+          dopplerToken:
+            namespace: default
+            name: doppler-token-auth-api
+            key: dopplerToken

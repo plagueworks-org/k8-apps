@@ -100,3 +100,15 @@ ports:
   websecure:
     tls:
       certResolver: "le"
+
+# Affinity
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+            - key: "node-pool"
+              operator: In
+              values:
+                - default-pool

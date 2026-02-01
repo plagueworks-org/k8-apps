@@ -80,3 +80,12 @@ ingress:
     target: traefik-prod.plagueworks.org
     cloudflareProxied: "true"
     cloudflareComment: "Koneksyon API managed by ExternalDns in oke-prod-zeus-apps"
+
+# Applies node affinity
+nodeAffinity:
+  enabled: true
+  required:
+    - key: node-pool
+      operator: In
+      values:
+        - default-pool

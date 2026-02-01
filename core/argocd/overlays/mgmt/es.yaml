@@ -1,0 +1,62 @@
+# The external secret for Auth0 app credentials
+# Adding these credentials to the existing inbuilt argocd-secret
+# So that it can be automatically mounted in dex
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: auth0-token
+  namespace: argocd
+spec:
+  secretStoreRef:
+    name: doppler-auth0-creds
+    kind: ClusterSecretStore
+  target:
+    name: argocd-secret
+    creationPolicy: Merge
+    template:
+      type: Opaque
+      data:
+        dex.auth0.clientId: "{{ .application_id }}"
+        dex.auth0.clientSecret: "{{ .application_secret }}"
+        dex.auth0.domain: "https://{{ .domain }}/"
+  dataFrom:
+  - extract:
+      key: AUTH0_APPS_ARGOCD_PLAGUEWORKS_CONFIG
+      decodingStrategy: "None"
+  data:
+  - secretKey: domain
+    remoteRef:
+      key: AUTH0_ADMINISTRATIVE_DOMAIN
+      decodingStrategy: "None"
+
+---
+# The external secret for Cloud Azure credentials
+# Adding these credentials to the existing inbuilt argocd-secret
+# So that it can be automatically mounted in dex
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: cloud-azure-token
+  namespace: argocd
+spec:
+  secretStoreRef:
+    name: doppler-cloud-azure-creds
+    kind: ClusterSecretStore
+  target:
+    name: argocd-secret
+    creationPolicy: Merge
+    template:
+      type: Opaque
+      data:
+        dex.azure.clientId: "{{ .application_id }}"
+        dex.azure.clientSecret: "{{ .application_secret }}"
+        dex.azure.tenantId: "{{ .tenant_id }}"
+  dataFrom:
+  - extract:
+      key: AZURE_APOLLO_APPS_ARGOCD_PLAGUEWORKS_CONFIG
+      decodingStrategy: "None"
+  data:
+  - secretKey: tenant_id
+    remoteRef:
+      key: AZURE_APOLLO_TENANT_ID
+      decodingStrategy: "None"
