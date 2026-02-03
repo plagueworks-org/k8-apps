@@ -16,9 +16,9 @@ spec:
 
   # Describes the data to fetch from Doppler
   data:
-  - secretKey: KONEYKSYON_API_APPSETTINGS
+  - secretKey: KONEKSYON_API_APPSETTINGS
     remoteRef:
-      key: KONEYKSYON_API_APPSETTINGS
+      key: KONEKSYON_API_APPSETTINGS
       conversionStrategy: Default	
       decodingStrategy: None
       metadataPolicy: None

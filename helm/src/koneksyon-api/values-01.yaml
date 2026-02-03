@@ -17,13 +17,13 @@ replicaCount: 1
 # Image
 image:
   repository: ghcr.io/zanbalak/koneksyon-api
-  tag: dev
+  tag: dev20260202-2f8e89d
   pullPolicy: Always
 
 volumeMounts:
   - name: appsettings-secret
     mountPath: /app/appsettings.json  # Path to your existing file
-    subPath: KONEYKSYON_API_APPSETTINGS  # The key from your secret
+    subPath: KONEKSYON_API_APPSETTINGS  # The key from your secret
     readOnly: true
 
 volumes:
