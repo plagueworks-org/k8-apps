@@ -1,0 +1,91 @@
+
+# App name
+name: koneksyon-api
+
+# Namespace
+namespace:
+  create: true
+  name: koneksyonapi
+  labels:
+    function: application
+    category: api
+    es: ghcr
+
+# Replica
+replicaCount: 1
+
+# Image
+image:
+  repository: ghcr.io/zanbalak/koneksyon-api
+  tag: dev20260202-2f8e89d
+  pullPolicy: Always
+
+volumeMounts:
+  - name: appsettings-secret
+    mountPath: /app/appsettings.json  # Path to your existing file
+    subPath: KONEKSYON_API_APPSETTINGS  # The key from your secret
+    readOnly: true
+
+volumes:
+  - name: appsettings-secret
+    secret:
+      secretName: koneksyon-api-appsettings
+      
+# Container port
+port: 8080
+
+# Container envs
+env:
+  - name: ASPNETCORE_ENVIRONMENT
+    value: "Development"
+  - name: ASPNETCORE_URLS
+    value: "http://+:8080"
+
+# Deployment
+deployment:
+  imagePullSecrets:
+    - name: ghcr-pull-secret
+
+# Health checks
+healthChecks:
+  enabled: false
+
+# Resources
+resources:
+  requests:
+    cpu: "250m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "256Mi"
+
+# Service
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+# Ingress
+ingress:
+  enabled: true
+  host: staging-koneksyonapi.plagueworks.org
+  entryPoints:
+    - websecure
+  tls:
+    enabled: true
+    certResolver: le
+  externalDns:
+    enabled: true
+    target: traefik-dev.plagueworks.org
+    cloudflareProxied: "true"
+    cloudflareComment: "Koneksyon API managed by ExternalDns in oke-dev-helios-apps"
+
+# Applies node affinity
+nodeAffinity:
+  enabled: true
+  required:
+    - key: node-pool
+      operator: In
+      values:
+        - default-pool

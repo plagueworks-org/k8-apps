@@ -69,7 +69,7 @@ service:
 # Ingress
 ingress:
   enabled: true
-  host: koneksyon-api.plagueworks.org
+  host: koneksyonapi.plagueworks.org
   entryPoints:
     - websecure
   tls:

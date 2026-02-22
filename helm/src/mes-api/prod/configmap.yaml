@@ -1,0 +1,552 @@
+apiVersion: v1
+data:
+  guidelines_en.json: |-
+    [
+        {
+            "level": 1,
+            "type": "alert",
+            "description": "Issued not less than 36 hours, nor more than 48 hours, before the occurrence of gusts of 120 kilometres per hour.",
+            "precautions": [
+                "Make sure your emergency kit is ready.",
+                "Monitor cyclone bulletins on Radio / TV / MES.",
+                "Prepare to secure windows and doors with shutters or shields."
+            ]
+        },
+        {
+            "level": 2,
+            "type": "alert",
+            "description": "Issued so as to allow, as far as practicable, 12 hours of daylight before the occurrence of gusts of 120 kilometres per hour.",
+            "precautions": [
+                "Verify that your emergency kit contains all essential items.",
+                "Store sufficient amount of drinking waterContinue to monitor cyclone bulletins on Radio / TV / MES"
+            ]
+        },
+        {
+            "level": 3,
+            "type": "alert",
+            "description": "Issued so as to allow, as far as practicable, 6 hours of daylight before the occurrence of gusts of 120 kilometres per hour.",
+            "precautions": [
+                "Fix shutters.",
+                "Secure doors and windows.",
+                "Store loose articles.",
+                "Avoid areas prone to storm surges and flooding.",
+                "Shelter domestic animals.",
+                "Secure vehicles.",
+                "Those in insecure dwellings, move as early as possible, to cyclone refugee centre with your emergency kit.",
+                "Avoid going outside.Monitor closely cyclone bulletins on Radio / TV / MES."
+            ]
+        },
+        {
+            "level": 4,
+            "type": "alert",
+            "description": "Issued when gusts of 120 kilometres per hour are recorded in some places and are expected to continue.",
+            "precautions": [
+                "Stay indoors.",
+                "Seek shelter in the safest part of the house.",
+                "Disconnect all electrical appliances.",
+                "Listen attentively to cyclone bulletins and advice on the Radio / TV / MES.",
+                "If the house starts to suffer important damages, protect yourself with mattress, rugs or blankets."
+            ]
+        },
+        {
+            "level": 0,
+            "type": "safety_bulletin",
+            "description": "Issued for the purpose of lifting the cyclone warning class III or cyclone warning class IV, as the case may be; and informing the public of the existence of any severe weather conditions associated with the cyclone and other environment risk, depending on the nature and extent of the damage occurred during the passage of the cyclone",
+            "precautions": []
+        },
+        {
+            "level": 0,
+            "type": "termination",
+            "description": "Following the issue of a cyclone warning class I, a cyclone warning class II or a safety bulletin, as the case may be, after consultation with, and following advice from the National Crisis Committee to the effect that outdoor risks have considerably decreased",
+            "precautions": [
+                "Do not leave your shelter until the all-clear signals have been given by relevant Authorities.",
+                "Do not consume fallen fruits.",
+                "Boil water for drinking purposes.",
+                "Beware of fallen power lines, damaged buildings and trees and flooded water courses.",
+                "Clean yard and drain out stagnant water to prevent proliferation of mosquitoes/diseases."
+            ]
+        }
+    ]
+  guidelines_fr.json: |-
+    [
+        {
+            "level": 1,
+            "type": "alert",
+            "description": "Émis au moins 36 heures, ni plus de 48 heures, avant l'apparition de rafales de 120 kilomètres par heure.",
+            "precautions": [
+                "Assurez-vous que votre trousse d'urgence est prête.",
+                "Surveiller les bulletins de cyclones sur Radio / TV / MES.",
+                "Préparez-vous à sécuriser les fenêtres et les portes avec des volets ou des boucliers."
+            ]
+        },
+        {
+            "level": 2,
+            "type": "alert",
+            "description": "Délivré de manière à permettre, dans la mesure du possible, 12 heures de clarté avant l'apparition de rafales de 120 kilomètres par heure.",
+            "precautions": [
+                "Vérifiez que votre trousse d'urgence contient tous les éléments essentiels.",
+                "Stocker une quantité suffisante d'eau potable. Continuer à surveiller les bulletins de cyclones sur Radio / TV / MES"
+            ]
+        },
+        {
+            "level": 3,
+            "type": "alert",
+            "description": "Émis de manière à permettre, dans la mesure du possible, 6 heures de clarté avant l'apparition de rafales de 120 kilomètres par heure.",
+            "precautions": [
+                "Réparer les volets.",
+                "Sécurisez les portes et les fenêtres.",
+                "Stocker les articles en vrac.",
+                "Évitez les zones sujettes aux ondes de tempête et aux inondations.",
+                "Abriter les animaux domestiques.",
+                "Véhicules sécurisés.",
+                "Ceux qui vivent dans des logements précaires, déplacez-vous le plus tôt possible vers un centre de réfugiés cyclonique avec votre kit d'urgence.",
+                "Évitez de sortir. Surveillez attentivement les bulletins de cyclones sur les radios / télévisions / MES."
+            ]
+        },
+        {
+            "level": 4,
+            "type": "alert",
+            "description": "Émis lorsque des rafales de 120 kilomètres par heure sont enregistrées à certains endroits et devraient se poursuivre.",
+            "precautions": [
+                "Restez à l'intérieur.",
+                "Cherchez refuge dans la partie la plus sûre de la maison.",
+                "Débranchez tous les appareils électriques.",
+                "Écoutez attentivement les bulletins et conseils cycloniques sur la Radio / TV / MES.",
+                "Si la maison commence à subir des dégâts importants, protégez-vous avec des matelas, des tapis ou des couvertures."
+            ]
+        },
+        {
+            "level": 0,
+            "type": "bulletin_de_securite",
+            "description": "Délivré dans le but de lever l'avertissement de cyclone de classe III ou d'avertissement de cyclone de classe IV, selon le cas; et informer le public de l'existence de conditions météorologiques extrêmes associées au cyclone et d'autres risques environnementaux, en fonction de la nature et de l'étendue des dommages survenus lors du passage du cyclone.",
+            "precautions": []
+        },
+        {
+            "level": 0,
+            "type": "résiliation",
+            "description": "Suite à l'émission d'une alerte cyclonique de classe I, d'une alerte cyclonique de classe II ou d'un bulletin de sécurité, selon le cas, après consultation et après avis du Comité national de crise selon lequel les risques extérieurs ont considérablement diminué.",
+            "precautions": [
+                "Ne quittez pas votre abri tant que les signaux d'autorisation n'ont pas été donnés par les autorités compétentes.",
+                "Ne consommez pas les fruits tombés.",
+                "Faire bouillir de l'eau potable.",
+                "Attention aux lignes électriques tombées, aux bâtiments et arbres endommagés et aux cours d'eau inondés.",
+                "Nettoyer la cour et évacuer l'eau stagnante pour éviter la prolifération des moustiques/maladies."
+            ]
+        }
+    ]
+  services_en.json: |-
+    [
+        {
+            "identifier": "security-police-direct",
+            "name": "Police Direct",
+            "type": "E",
+            "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
+            "main_contact": 999,
+            "emails": [],
+            "other_contacts": [
+                112
+            ]
+        },
+        {
+            "identifier": "health-samu",
+            "name": "Samu",
+            "type": "E",
+            "icon": "https://img.icons8.com/bubbles/100/000000/ambulance.png",
+            "main_contact": 114,
+            "emails": [],
+            "other_contacts": []
+        },
+        {
+            "identifier": "health-ccare-ambulance",
+            "name": "C-Care Ambulance",
+            "type": "E",
+            "icon": "https://img.icons8.com/bubbles/100/000000/ambulance.png",
+            "main_contact": 118,
+            "emails": [],
+            "other_contacts": [
+                132
+            ]
+        },
+        {
+            "identifier": "security-police-tourism",
+            "name": "Tourism Police",
+            "type": "N",
+            "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
+            "main_contact": 2131740,
+            "emails": [],
+            "other_contacts": []
+        },
+        {
+            "identifier": "security-crime-prevention-unit",
+            "name": "Crime Prevention Unit",
+            "type": "E",
+            "icon": "https://img.icons8.com/color/100/000000/robber.png",
+            "main_contact": 148,
+            "emails": [],
+            "other_contacts": []
+        },
+        {
+            "identifier": "security-rescue-fire",
+            "name": "Fire Rescue Services",
+            "type": "E",
+            "icon": "https://img.icons8.com/bubbles/100/000000/fire-element.png",
+            "main_contact": 115,
+            "emails": [],
+            "other_contacts": [
+                995,
+                2120214,
+                2120215
+            ]
+        },
+        {
+            "identifier": "police-complaints",
+            "name": "Police Complaints",
+            "type": "N",
+            "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
+            "main_contact": 8002345,
+            "emails": [],
+            "other_contacts": []
+        },
+        {
+            "identifier": "security-minor-brigade",
+            "name": "Brigade of minors",
+            "type": "N",
+            "icon": "https://img.icons8.com/bubbles/100/000000/child-safe-zone.png",
+            "main_contact": 2134093,
+            "emails": [
+                "bdmineur.mpf@govmu.org"
+            ],
+            "other_contacts": []
+        },
+        {
+            "identifier": "general-ceb",
+            "name": "Central Electricity Board (CEB)",
+            "type": "N",
+            "icon": "https://img.icons8.com/plasticine/100/000000/electricity-hazard.png",
+            "main_contact": 130,
+            "emails": [
+                "ceb@intnet.mu"
+            ],
+            "other_contacts": [
+                4042000
+            ]
+        },
+        {
+            "identifier": "general-cwa",
+            "name": "Central Water Authority (CWA)",
+            "type": "N",
+            "icon": "https://img.icons8.com/bubbles/100/000000/water.png",
+            "main_contact": 170,
+            "emails": [
+                "infodesk@cwa.intnet.mu"
+            ],
+            "other_contacts": [
+                6015000
+            ]
+        },
+        {
+            "identifier": "security-police-environmental",
+            "name": "Environmental Police",
+            "type": "N",
+            "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
+            "main_contact": 2105151,
+            "emails": [
+                "police-env@govmu.org"
+            ],
+            "other_contacts": [
+                2105252
+            ]
+        },
+        {
+            "identifier": "info-national-directory",
+            "name": "National Directory",
+            "type": "N",
+            "icon": "https://img.icons8.com/cute-clipart/100/000000/contacts.png",
+            "main_contact": 150,
+            "emails": [],
+            "other_contacts": []
+        },
+        {
+            "identifier": "info-tourist",
+            "name": "Tourist Info",
+            "type": "N",
+            "icon": "https://img.icons8.com/cute-clipart/100/000000/contacts.png",
+            "main_contact": 152,
+            "emails": [
+                "tourism.authority@intnet.mu",
+                "contactadmin@tourismauthority.mu"
+            ],
+            "other_contacts": [
+                2031000
+            ]
+        },
+        {
+            "identifier": "info-weather",
+            "name": "Weather Forecasts",
+            "type": "N",
+            "icon": "https://img.icons8.com/color/100/000000/partly-cloudy-day.png",
+            "main_contact": 171,
+            "emails": [
+                "meteo@intnet.mu"
+            ],
+            "other_contacts": [
+                6861031,
+                6861032
+            ]
+        },
+        {
+            "identifier": "info-airline",
+            "name": "Airport",
+            "type": "N",
+            "icon": "https://img.icons8.com/color/100/000000/airport.png",
+            "main_contact": 8965,
+            "emails": [],
+            "other_contacts": [
+                6373187,
+                6038050
+            ]
+        },
+        {
+            "identifier": "wastewater-management-authority",
+            "name": "Wastewater Management Authority",
+            "type": "N",
+            "icon": "https://img.icons8.com/external-filled-color-icons-papa-vector/100/null/external-Water-Contamination-With-Human-Feces-liver-health-filled-color-icons-papa-vector.png",
+            "main_contact": 2063000,
+            "emails": [
+                "wma@intnet.mu"
+            ],
+            "other_contacts": [
+                8001300
+            ]
+        },
+        {
+            "identifier": "central-cid-ssu",
+            "name": "Central CID / SSU",
+            "type": "N",
+            "icon": "https://img.icons8.com/color/100/fraud.png",
+            "main_contact": 2081212,
+            "emails": [],
+            "other_contacts": []
+        },
+        {
+            "identifier": "traffic",
+            "name": "Traffic",
+            "type": "N",
+            "icon": "https://img.icons8.com/color/100/traffic-light.png",
+            "main_contact": 2118434,
+            "emails": [],
+            "other_contacts": [
+                2118478
+            ]
+        }
+    ]
+  services_fr.json: |-
+    [
+        {
+            "identifier": "security-police-direct",
+            "name": "Police - Ligne directe",
+            "type": "E",
+            "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
+            "main_contact": 999,
+            "emails": [],
+            "other_contacts": [
+                112
+            ]
+        },
+        {
+            "identifier": "health-samu",
+            "name": "Samu",
+            "type": "E",
+            "icon": "https://img.icons8.com/bubbles/100/000000/ambulance.png",
+            "main_contact": 114,
+            "emails": [],
+            "other_contacts": []
+        },
+        {
+            "identifier": "health-ccare-ambulance",
+            "name": "Ambulance C-Care",
+            "type": "E",
+            "icon": "https://img.icons8.com/bubbles/100/000000/ambulance.png",
+            "main_contact": 118,
+            "emails": [],
+            "other_contacts": [
+                132
+            ]
+        },
+        {
+            "identifier": "security-police-tourism",
+            "name": "Police du Tourisme",
+            "type": "N",
+            "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
+            "main_contact": 2131740,
+            "emails": [],
+            "other_contacts": []
+        },
+        {
+            "identifier": "security-crime-prevention-unit",
+            "name": "Unité de prévention du crime",
+            "type": "E",
+            "icon": "https://img.icons8.com/color/100/000000/robber.png",
+            "main_contact": 148,
+            "emails": [],
+            "other_contacts": []
+        },
+        {
+            "identifier": "security-rescue-fire",
+            "name": "Pompiers",
+            "type": "E",
+            "icon": "https://img.icons8.com/bubbles/100/000000/fire-element.png",
+            "main_contact": 115,
+            "emails": [],
+            "other_contacts": [
+                995,
+                2120214,
+                2120215
+            ]
+        },
+        {
+            "identifier": "police-complaints",
+            "name": "Plaintes policière",
+            "type": "N",
+            "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
+            "main_contact": 8002345,
+            "emails": [],
+            "other_contacts": []
+        },
+        {
+            "identifier": "security-minor-brigade",
+            "name": "Brigade des mineures",
+            "type": "N",
+            "icon": "https://img.icons8.com/bubbles/100/000000/child-safe-zone.png",
+            "main_contact": 2134093,
+            "emails": [
+                "bdmineur.mpf@govmu.org"
+            ],
+            "other_contacts": []
+        },
+        {
+            "identifier": "general-ceb",
+            "name": "Conseil central de l'électricité (CEB)",
+            "type": "N",
+            "icon": "https://img.icons8.com/plasticine/100/000000/electricity-hazard.png",
+            "main_contact": 130,
+            "emails": [
+                "ceb@intnet.mu"
+            ],
+            "other_contacts": [
+                4042000
+            ]
+        },
+        {
+            "identifier": "general-cwa",
+            "name": "Autorité centrale de l'eau (CWA)",
+            "type": "N",
+            "icon": "https://img.icons8.com/bubbles/100/000000/water.png",
+            "main_contact": 170,
+            "emails": [
+                "infodesk@cwa.intnet.mu"
+            ],
+            "other_contacts": [
+                6015000
+            ]
+        },
+        {
+            "identifier": "security-police-environmental",
+            "name": "Police de l'environnement",
+            "type": "N",
+            "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
+            "main_contact": 2105151,
+            "emails": [
+                "police-env@govmu.org"
+            ],
+            "other_contacts": [
+                2105252
+            ]
+        },
+        {
+            "identifier": "info-national-directory",
+            "name": "Annuaire national",
+            "type": "N",
+            "icon": "https://img.icons8.com/cute-clipart/100/000000/contacts.png",
+            "main_contact": 150,
+            "emails": [],
+            "other_contacts": []
+        },
+        {
+            "identifier": "info-tourist",
+            "name": "Informations touristiques",
+            "type": "N",
+            "icon": "https://img.icons8.com/cute-clipart/100/000000/contacts.png",
+            "main_contact": 152,
+            "emails": [
+                "tourism.authority@intnet.mu",
+                "contactadmin@tourismauthority.mu"
+            ],
+            "other_contacts": [
+                2031000
+            ]
+        },
+        {
+            "identifier": "info-weather",
+            "name": "Prévisions météorologiques",
+            "type": "N",
+            "icon": "https://img.icons8.com/color/100/000000/partly-cloudy-day.png",
+            "main_contact": 171,
+            "emails": [
+                "meteo@intnet.mu"
+            ],
+            "other_contacts": [
+                6861031,
+                6861032
+            ]
+        },
+        {
+            "identifier": "info-airline",
+            "name": "Aéroport",
+            "type": "N",
+            "icon": "https://img.icons8.com/color/100/000000/airport.png",
+            "main_contact": 8965,
+            "emails": [],
+            "other_contacts": [
+                6373187,
+                6038050
+            ]
+        },
+        {
+            "identifier": "wastewater-management-authority",
+            "name": "Autorité de gestion des eaux usées",
+            "type": "N",
+            "icon": "https://img.icons8.com/external-filled-color-icons-papa-vector/100/null/external-Water-Contamination-With-Human-Feces-liver-health-filled-color-icons-papa-vector.png",
+            "main_contact": 2063000,
+            "emails": [
+                "wma@intnet.mu"
+            ],
+            "other_contacts": [
+                8001300
+            ]
+        },
+        {
+            "identifier": "central-cid-ssu",
+            "name": "CID Centrale/ SSU",
+            "type": "N",
+            "icon": "https://img.icons8.com/color/100/fraud.png",
+            "main_contact": 2081212,
+            "emails": [],
+            "other_contacts": []
+        },
+        {
+            "identifier": "traffic",
+            "name": "Traffic",
+            "type": "N",
+            "icon": "https://img.icons8.com/color/100/traffic-light.png",
+            "main_contact": 2118434,
+            "emails": [],
+            "other_contacts": [
+                2118478
+            ]
+        }
+    ]
+kind: ConfigMap
+metadata:
+  name: mes-api-data-configmap
+  namespace: mesapi

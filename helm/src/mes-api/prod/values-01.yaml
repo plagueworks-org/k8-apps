@@ -88,10 +88,10 @@ service:
 ingress:
   enabled: true
   hosts:
-    - host: mes.mervinhemaraju.com
     - host: mesapi.mervinhemaraju.com
-    - host: mes.plagueworks.org
     - host: mesapi.plagueworks.org
+    # - host: mes.mervinhemaraju.com
+    # - host: mes.plagueworks.org
   entryPoints:
     - websecure
   tls:

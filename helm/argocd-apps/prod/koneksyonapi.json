@@ -15,7 +15,7 @@
             "namespace": "koneksyonapi"
         },
         "source": {
-            "path": "helm/src/koneksyon-api",
+            "path": "helm/src/koneksyon-api/prod",
             "repoURL": "https://github.com/plagueworks-org/k8-apps",
             "targetRevision": "main"
         },

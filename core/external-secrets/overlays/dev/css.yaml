@@ -9,7 +9,7 @@ spec:
   provider:
     doppler:
       project: koneksyon
-      config: prd
+      config: dev
       auth:
         secretRef:
           dopplerToken:

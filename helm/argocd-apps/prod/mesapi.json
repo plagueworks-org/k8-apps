@@ -15,7 +15,7 @@
             "namespace": "mesapi"
         },
         "source": {
-            "path": "helm/src/mes-api",
+            "path": "helm/src/mes-api/prod",
             "repoURL": "https://github.com/plagueworks-org/k8-apps",
             "targetRevision": "main"
         },

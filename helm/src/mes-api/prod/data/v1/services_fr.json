@@ -1,0 +1,205 @@
+[
+    {
+        "identifier": "security-police-direct",
+        "name": "Police - Ligne directe",
+        "type": "E",
+        "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
+        "main_contact": 999,
+        "emails": [],
+        "other_contacts": [
+            112
+        ]
+    },
+    {
+        "identifier": "health-samu",
+        "name": "Samu",
+        "type": "E",
+        "icon": "https://img.icons8.com/bubbles/100/000000/ambulance.png",
+        "main_contact": 114,
+        "emails": [],
+        "other_contacts": []
+    },
+    {
+        "identifier": "health-ccare-ambulance",
+        "name": "Ambulance C-Care",
+        "type": "E",
+        "icon": "https://img.icons8.com/bubbles/100/000000/ambulance.png",
+        "main_contact": 118,
+        "emails": [],
+        "other_contacts": [
+            132
+        ]
+    },
+    {
+        "identifier": "security-police-tourism",
+        "name": "Police du Tourisme",
+        "type": "N",
+        "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
+        "main_contact": 2131740,
+        "emails": [],
+        "other_contacts": []
+    },
+    {
+        "identifier": "security-crime-prevention-unit",
+        "name": "Unité de prévention du crime",
+        "type": "E",
+        "icon": "https://img.icons8.com/color/100/000000/robber.png",
+        "main_contact": 148,
+        "emails": [],
+        "other_contacts": []
+    },
+    {
+        "identifier": "security-rescue-fire",
+        "name": "Pompiers",
+        "type": "E",
+        "icon": "https://img.icons8.com/bubbles/100/000000/fire-element.png",
+        "main_contact": 115,
+        "emails": [],
+        "other_contacts": [
+            995,
+            2120214,
+            2120215
+        ]
+    },
+    {
+        "identifier": "police-complaints",
+        "name": "Plaintes policière",
+        "type": "N",
+        "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
+        "main_contact": 8002345,
+        "emails": [],
+        "other_contacts": []
+    },
+    {
+        "identifier": "security-minor-brigade",
+        "name": "Brigade des mineures",
+        "type": "N",
+        "icon": "https://img.icons8.com/bubbles/100/000000/child-safe-zone.png",
+        "main_contact": 2134093,
+        "emails": [
+            "bdmineur.mpf@govmu.org"
+        ],
+        "other_contacts": []
+    },
+    {
+        "identifier": "general-ceb",
+        "name": "Conseil central de l'électricité (CEB)",
+        "type": "N",
+        "icon": "https://img.icons8.com/plasticine/100/000000/electricity-hazard.png",
+        "main_contact": 130,
+        "emails": [
+            "ceb@intnet.mu"
+        ],
+        "other_contacts": [
+            4042000
+        ]
+    },
+    {
+        "identifier": "general-cwa",
+        "name": "Autorité centrale de l'eau (CWA)",
+        "type": "N",
+        "icon": "https://img.icons8.com/bubbles/100/000000/water.png",
+        "main_contact": 170,
+        "emails": [
+            "infodesk@cwa.intnet.mu"
+        ],
+        "other_contacts": [
+            6015000
+        ]
+    },
+    {
+        "identifier": "security-police-environmental",
+        "name": "Police de l'environnement",
+        "type": "N",
+        "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
+        "main_contact": 2105151,
+        "emails": [
+            "police-env@govmu.org"
+        ],
+        "other_contacts": [
+            2105252
+        ]
+    },
+    {
+        "identifier": "info-national-directory",
+        "name": "Annuaire national",
+        "type": "N",
+        "icon": "https://img.icons8.com/cute-clipart/100/000000/contacts.png",
+        "main_contact": 150,
+        "emails": [],
+        "other_contacts": []
+    },
+    {
+        "identifier": "info-tourist",
+        "name": "Informations touristiques",
+        "type": "N",
+        "icon": "https://img.icons8.com/cute-clipart/100/000000/contacts.png",
+        "main_contact": 152,
+        "emails": [
+            "tourism.authority@intnet.mu",
+            "contactadmin@tourismauthority.mu"
+        ],
+        "other_contacts": [
+            2031000
+        ]
+    },
+    {
+        "identifier": "info-weather",
+        "name": "Prévisions météorologiques",
+        "type": "N",
+        "icon": "https://img.icons8.com/color/100/000000/partly-cloudy-day.png",
+        "main_contact": 171,
+        "emails": [
+            "meteo@intnet.mu"
+        ],
+        "other_contacts": [
+            6861031,
+            6861032
+        ]
+    },
+    {
+        "identifier": "info-airline",
+        "name": "Aéroport",
+        "type": "N",
+        "icon": "https://img.icons8.com/color/100/000000/airport.png",
+        "main_contact": 8965,
+        "emails": [],
+        "other_contacts": [
+            6373187,
+            6038050
+        ]
+    },
+    {
+        "identifier": "wastewater-management-authority",
+        "name": "Autorité de gestion des eaux usées",
+        "type": "N",
+        "icon": "https://img.icons8.com/external-filled-color-icons-papa-vector/100/null/external-Water-Contamination-With-Human-Feces-liver-health-filled-color-icons-papa-vector.png",
+        "main_contact": 2063000,
+        "emails": [
+            "wma@intnet.mu"
+        ],
+        "other_contacts": [
+            8001300
+        ]
+    },
+    {
+        "identifier": "central-cid-ssu",
+        "name": "CID Centrale/ SSU",
+        "type": "N",
+        "icon": "https://img.icons8.com/color/100/fraud.png",
+        "main_contact": 2081212,
+        "emails": [],
+        "other_contacts": []
+    },
+    {
+        "identifier": "traffic",
+        "name": "Traffic",
+        "type": "N",
+        "icon": "https://img.icons8.com/color/100/traffic-light.png",
+        "main_contact": 2118434,
+        "emails": [],
+        "other_contacts": [
+            2118478
+        ]
+    }
+]
