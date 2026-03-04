@@ -17,7 +17,7 @@ replicaCount: 1
 # Image
 image:
   repository: ghcr.io/zanbalak/koneksyon-api
-  tag: dev20260202-2f8e89d
+  tag: dev20260304-8759f5f
   pullPolicy: Always
 
 volumeMounts:

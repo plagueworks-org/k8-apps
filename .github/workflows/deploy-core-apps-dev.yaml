@@ -114,3 +114,20 @@ jobs:
         uses: plagueworks-org/k8-apps/.github/actions/deploy-core-apps@main
         with:
           environment: "dev"
+
+      - name: Deploy FluxCD
+        shell: bash
+        working-directory: core/fluxcd/overlays/dev
+        run: |
+          echo "Deploying FluxCD..."
+          kubectl kustomize . > fluxcd-config.yaml
+          kfilt -i kind=CustomResourceDefinition -f fluxcd-config.yaml | kubectl apply --server-side -f -
+          kfilt -i kind=CustomResourceDefinition -f fluxcd-config.yaml | kubectl wait --for=condition=established --timeout=60s -f -
+          kubectl apply --server-side -f fluxcd-config.yaml
+
+          echo "Waiting for FluxCD to be ready..."
+          kubectl wait --for=condition=ready pod -n flux-system -l app=source-controller --timeout=300s
+          kubectl wait --for=condition=ready pod -n flux-system -l app=kustomize-controller --timeout=300s
+          kubectl wait --for=condition=ready pod -n flux-system -l app=helm-controller --timeout=300s
+
+          echo "FluxCD deployment completed"
