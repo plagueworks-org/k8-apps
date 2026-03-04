@@ -7,4 +7,4 @@ spec:
   interval: 1m
   url: https://github.com/plagueworks-org/k8-apps
   ref:
-    branch: main
+    branch: dev
