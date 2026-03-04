@@ -114,3 +114,27 @@ jobs:
         uses: plagueworks-org/k8-apps/.github/actions/deploy-core-apps@main
         with:
           environment: "mgmt"
+
+      - name: Install ArgoCD
+        shell: bash
+        working-directory: core/argocd/overlays/mgmt
+        run: |
+          echo "Installing ArgoCD..."
+          kubectl kustomize --enable-helm . > argocd-config.yaml
+          kubectl -n argocd apply -f argocd-config.yaml
+
+          echo "Waiting for ArgoCD to be ready..."
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-server --timeout=300s
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-repo-server --timeout=300s
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-redis --timeout=300s
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-dex-server --timeout=300s
+          kubectl wait --for=condition=ready pod -n argocd -l app.kubernetes.io/name=argocd-applicationset-controller --timeout=300s
+
+          echo "ArgoCD installation completed"
+
+      - name: Install ArgoCD Manager Configurations
+        shell: bash
+        working-directory: core/configs/argocdmanager/mgmt
+        run: |
+          echo "Installing ArgoCD Manager Configurations..."
+          kubectl apply -f .
