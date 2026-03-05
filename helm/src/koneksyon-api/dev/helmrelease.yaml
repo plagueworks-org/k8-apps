@@ -7,13 +7,12 @@ spec:
   driftDetection:
     mode: enabled
   interval: 5m
-  chart:
-    spec:
-      chart: plagueworks-k8-standard-charts
-      sourceRef:
-        kind: OCIRepository
-        name: plagueworks-helm-charts
-        namespace: flux-system
+  
+  chartRef:
+    kind: OCIRepository
+    name: plagueworks-helm-charts
+    namespace: flux-system
+
   valuesFrom:
     - kind: ConfigMap
       name: koneksyon-api-values
