@@ -5,3 +5,4 @@ resources:
   - ../../base
   - gitrepository.yaml
   - kustomization-apps.yaml
+  - ocirepository.yaml

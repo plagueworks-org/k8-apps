@@ -5,12 +5,21 @@ namespace: koneksyonapi
 
 resources:
   - es.yaml
+  - helmrelease.yaml
 
-helmCharts:
-  - name: plagueworks-k8-standard-charts
-    repo: oci://ghcr.io/mervinhemaraju
-    version: "1.1.0"
-    releaseName: koneksyon-api
-    namespace: koneksyonapi
-    additionalValuesFiles:
-      - values-01.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+- name: koneksyon-api-values
+  namespace: koneksyonapi
+  files:
+  - values-01.yaml
+
+# helmCharts:
+#   - name: plagueworks-k8-standard-charts
+#     repo: oci://ghcr.io/mervinhemaraju
+#     version: "1.1.0"
+#     releaseName: koneksyon-api
+#     namespace: koneksyonapi
+#     additionalValuesFiles:
+#       - values-01.yaml
