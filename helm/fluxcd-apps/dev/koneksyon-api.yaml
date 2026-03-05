@@ -9,6 +9,5 @@ spec:
   prune: true
   sourceRef:
     kind: GitRepository
-    name: flux-system
-  # buildOptions:
-  #   enableHelm: true
+    name: github-k8
+    namespace: flux-system
