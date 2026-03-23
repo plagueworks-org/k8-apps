@@ -26,12 +26,20 @@ resources:
   - torrentialrain-configmap.yaml
   - tsunami-configmap.yaml
   - helmrelease.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+- name: mes-api-values
+  namespace: mesapi
+  files:
+  - values-01.yaml
   
-helmCharts:
-  - name: plagueworks-k8-standard-charts
-    repo: oci://ghcr.io/mervinhemaraju
-    version: "1.1.0"
-    releaseName: mes-api
-    namespace: mesapi
-    additionalValuesFiles:
-      - values-01.yaml
+# helmCharts:
+#   - name: plagueworks-k8-standard-charts
+#     repo: oci://ghcr.io/mervinhemaraju
+#     version: "1.1.0"
+#     releaseName: mes-api
+#     namespace: mesapi
+#     additionalValuesFiles:
+#       - values-01.yaml
