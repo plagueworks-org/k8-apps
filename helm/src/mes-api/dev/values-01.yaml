@@ -4,11 +4,7 @@ name: mes-api
 
 # Namespace
 namespace:
-  create: true
-  name: mesapi
-  labels:
-    function: application
-    category: api
+  create: false
 
 # Replica
 replicaCount: 1
