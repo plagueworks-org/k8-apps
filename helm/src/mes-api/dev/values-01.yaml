@@ -16,7 +16,7 @@ replicaCount: 1
 # Image
 image:
   repository: ghcr.io/mervinhemaraju/mauritius-emergency-service-api
-  tag: dev
+  tag: dev20260323-5e67216
   pullPolicy: Always
 
 # Container port
