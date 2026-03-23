@@ -1,0 +1,19 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: mes-api-release
+  namespace: mesapi
+spec:
+  driftDetection:
+    mode: enabled
+  interval: 5m
+  
+  chartRef:
+    kind: OCIRepository
+    name: plagueworks-helm-charts
+    namespace: flux-system
+
+  valuesFrom:
+    - kind: ConfigMap
+      name: mes-api-values
+      valuesKey: values-01.yaml

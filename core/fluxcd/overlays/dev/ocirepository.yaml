@@ -1,0 +1,12 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: plagueworks-helm-charts
+  namespace: flux-system
+
+spec:
+  interval: 10m
+  url: oci://ghcr.io/mervinhemaraju/plagueworks-k8-standard-charts
+  ref:
+    tag: "1.1.0"
+    

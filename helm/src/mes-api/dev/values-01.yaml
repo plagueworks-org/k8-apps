@@ -4,11 +4,8 @@ name: mes-api
 
 # Namespace
 namespace:
-  create: true
+  create: false
   name: mesapi
-  labels:
-    function: application
-    category: api
 
 # Replica
 replicaCount: 1
@@ -16,7 +13,7 @@ replicaCount: 1
 # Image
 image:
   repository: ghcr.io/mervinhemaraju/mauritius-emergency-service-api
-  tag: dev
+  tag: dev20260323-5e67216
   pullPolicy: Always
 
 # Container port
@@ -38,13 +35,31 @@ env:
 
 # Volumes and mounts
 volumes:
-  - name: data-config
+  - name: data-contacts
     configMap:
-      name: mes-api-data-configmap
+      name: mes-api-contacts
+  - name: data-cyclone
+    configMap:
+      name: mes-api-cyclone
+  - name: data-torrentialrain
+    configMap:
+      name: mes-api-torrentialrain
+  - name: data-tsunami
+    configMap:
+      name: mes-api-tsunami
 
 volumeMounts:
-  - name: data-config
-    mountPath: /app/data/v1
+  - name: data-contacts
+    mountPath: /app/data/v1/contacts
+    readOnly: true
+  - name: data-cyclone
+    mountPath: /app/data/v1/cyclone
+    readOnly: true
+  - name: data-torrentialrain
+    mountPath: /app/data/v1/torrentialrain
+    readOnly: true
+  - name: data-tsunami
+    mountPath: /app/data/v1/tsunami
     readOnly: true
 
 # Health checks
@@ -72,10 +87,10 @@ healthChecks:
 resources:
   requests:
     cpu: "50m"
-    memory: "64Mi"
+    memory: "128Mi"
   limits:
     cpu: "100m"
-    memory: "128Mi"
+    memory: "256Mi"
 
 # Service
 service:

@@ -1,7 +1,7 @@
 [
     {
         "identifier": "security-police-direct",
-        "name": "Police Direct",
+        "name": "Police - Ligne directe",
         "type": "E",
         "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
         "main_contact": 999,
@@ -21,7 +21,7 @@
     },
     {
         "identifier": "health-ccare-ambulance",
-        "name": "C-Care Ambulance",
+        "name": "Ambulance C-Care",
         "type": "E",
         "icon": "https://img.icons8.com/bubbles/100/000000/ambulance.png",
         "main_contact": 118,
@@ -32,7 +32,7 @@
     },
     {
         "identifier": "security-police-tourism",
-        "name": "Tourism Police",
+        "name": "Police du Tourisme",
         "type": "N",
         "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
         "main_contact": 2131740,
@@ -41,7 +41,7 @@
     },
     {
         "identifier": "security-crime-prevention-unit",
-        "name": "Crime Prevention Unit",
+        "name": "Unité de prévention du crime",
         "type": "E",
         "icon": "https://img.icons8.com/color/100/000000/robber.png",
         "main_contact": 148,
@@ -50,7 +50,7 @@
     },
     {
         "identifier": "security-rescue-fire",
-        "name": "Fire Rescue Services",
+        "name": "Pompiers",
         "type": "E",
         "icon": "https://img.icons8.com/bubbles/100/000000/fire-element.png",
         "main_contact": 115,
@@ -63,7 +63,7 @@
     },
     {
         "identifier": "police-complaints",
-        "name": "Police Complaints",
+        "name": "Plaintes policière",
         "type": "N",
         "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
         "main_contact": 8002345,
@@ -72,7 +72,7 @@
     },
     {
         "identifier": "security-minor-brigade",
-        "name": "Brigade of minors",
+        "name": "Brigade des mineures",
         "type": "N",
         "icon": "https://img.icons8.com/bubbles/100/000000/child-safe-zone.png",
         "main_contact": 2134093,
@@ -83,7 +83,7 @@
     },
     {
         "identifier": "general-ceb",
-        "name": "Central Electricity Board (CEB)",
+        "name": "Conseil central de l'électricité (CEB)",
         "type": "N",
         "icon": "https://img.icons8.com/plasticine/100/000000/electricity-hazard.png",
         "main_contact": 130,
@@ -96,7 +96,7 @@
     },
     {
         "identifier": "general-cwa",
-        "name": "Central Water Authority (CWA)",
+        "name": "Autorité centrale de l'eau (CWA)",
         "type": "N",
         "icon": "https://img.icons8.com/bubbles/100/000000/water.png",
         "main_contact": 170,
@@ -109,7 +109,7 @@
     },
     {
         "identifier": "security-police-environmental",
-        "name": "Environmental Police",
+        "name": "Police de l'environnement",
         "type": "N",
         "icon": "https://img.icons8.com/fluent/100/000000/policeman-male.png",
         "main_contact": 2105151,
@@ -122,7 +122,7 @@
     },
     {
         "identifier": "info-national-directory",
-        "name": "National Directory",
+        "name": "Annuaire national",
         "type": "N",
         "icon": "https://img.icons8.com/cute-clipart/100/000000/contacts.png",
         "main_contact": 150,
@@ -131,7 +131,7 @@
     },
     {
         "identifier": "info-tourist",
-        "name": "Tourist Info",
+        "name": "Informations touristiques",
         "type": "N",
         "icon": "https://img.icons8.com/cute-clipart/100/000000/contacts.png",
         "main_contact": 152,
@@ -145,7 +145,7 @@
     },
     {
         "identifier": "info-weather",
-        "name": "Weather Forecasts",
+        "name": "Prévisions météorologiques",
         "type": "N",
         "icon": "https://img.icons8.com/color/100/000000/partly-cloudy-day.png",
         "main_contact": 171,
@@ -159,7 +159,7 @@
     },
     {
         "identifier": "info-airline",
-        "name": "Airport",
+        "name": "Aéroport",
         "type": "N",
         "icon": "https://img.icons8.com/color/100/000000/airport.png",
         "main_contact": 8965,
@@ -171,7 +171,7 @@
     },
     {
         "identifier": "wastewater-management-authority",
-        "name": "Wastewater Management Authority",
+        "name": "Autorité de gestion des eaux usées",
         "type": "N",
         "icon": "https://img.icons8.com/external-filled-color-icons-papa-vector/100/null/external-Water-Contamination-With-Human-Feces-liver-health-filled-color-icons-papa-vector.png",
         "main_contact": 2063000,
@@ -184,7 +184,7 @@
     },
     {
         "identifier": "central-cid-ssu",
-        "name": "Central CID / SSU",
+        "name": "CID Centrale/ SSU",
         "type": "N",
         "icon": "https://img.icons8.com/color/100/fraud.png",
         "main_contact": 2081212,
