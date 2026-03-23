@@ -5,6 +5,7 @@ name: mes-api
 # Namespace
 namespace:
   create: false
+  name: mesapi
 
 # Replica
 replicaCount: 1
