@@ -37,16 +37,16 @@ env:
 volumes:
   - name: data-contacts
     configMap:
-      name: mes-api-contacts-configmap
+      name: mes-api-contacts
   - name: data-cyclone
     configMap:
-      name: mes-api-cyclone-configmap
+      name: mes-api-cyclone
   - name: data-torrentialrain
     configMap:
-      name: mes-api-torrentialrain-configmap
+      name: mes-api-torrentialrain
   - name: data-tsunami
     configMap:
-      name: mes-api-tsunami-configmap
+      name: mes-api-tsunami
 
 volumeMounts:
   - name: data-contacts
