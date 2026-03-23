@@ -1,0 +1,184 @@
+apiVersion: v1
+data:
+  precautions_en.json: |
+    {
+        "id": "tsunami_precautions",
+        "title": "Precautions",
+        "sections": [
+            {
+                "id": "when_to_evacuate",
+                "title": "When To Evacuate?",
+                "content": "When a Tsunami Warning Bulletin is issued by the Mauritius Meteorological Services, announcements to evacuate will be made through TV & radio stations and Police hailers. The public is advised to follow the directives of the Police during evacuation."
+            },
+            {
+                "id": "where_to_evacuate",
+                "title": "Where To Evacuate?",
+                "content": "Those living or working in coastal areas should immediately move to higher grounds or evacuate vertically wherever a tall strong building, made of concrete, is available."
+            },
+            {
+                "id": "things_to_remember",
+                "title": "Things to Remember",
+                "precautions": [
+                    "If you see an unexpected rise or fall in the sea, a tsunami may be approaching. You are strongly advised to move uphill.",
+                    "Stay tuned to your radio or TV during a disaster. Information bulletins regarding the situation will be broadcast regularly.",
+                    "Follow the emergency signs and the directives of the Police.",
+                    "Never go to the coast to watch a tsunami. Tsunamis move faster than a person can run.",
+                    "Do not return to the beach until Emergency Officials give the 'All Clear' signal.",
+                    "All low lying coastal areas can be struck by a tsunami.",
+                    "Tsunamis can occur at any time of day or night.",
+                    "Tsunamis can travel up rivers and streams from the ocean.",
+                    "Tsunamis can easily wrap around islands and be just as dangerous on coasts not facing the source of the tsunami.",
+                    "Prepare an emergency kit with basic necessities (water, food items, blankets, first aid supplies, medicines, radio, torch) which is portable during evacuation.",
+                    "Share your knowledge with family and friends, it could save their lives."
+                ]
+            }
+        ]
+    }
+  precautions_fr.json: |
+    {
+        "id": "tsunami_precautions",
+        "title": "Précautions",
+        "sections": [
+            {
+                "id": "when_to_evacuate",
+                "title": "Quand Évacuer ?",
+                "content": "Lorsqu'un Bulletin d'Avertissement de Tsunami est émis par les Services Météorologiques de Maurice, des annonces d'évacuation seront diffusées par les stations de TV et de radio ainsi que par les haut-parleurs de la Police. Le public est invité à suivre les directives de la Police lors de l'évacuation."
+            },
+            {
+                "id": "where_to_evacuate",
+                "title": "Où Évacuer ?",
+                "content": "Les personnes vivant ou travaillant dans les zones côtières doivent immédiatement se déplacer vers des terrains plus élevés ou évacuer verticalement lorsqu'un bâtiment solide en béton est disponible."
+            },
+            {
+                "id": "things_to_remember",
+                "title": "Choses à Retenir",
+                "precautions": [
+                    "Si vous observez une montée ou une baisse inattendue de la mer, un tsunami pourrait approcher. Il vous est fortement conseillé de vous diriger vers les hauteurs.",
+                    "Restez à l'écoute de votre radio ou de votre télévision lors d'une catastrophe. Des bulletins d'information sur la situation seront diffusés régulièrement.",
+                    "Suivez les panneaux d'urgence et les directives de la Police.",
+                    "Ne vous rendez jamais sur la côte pour observer un tsunami. Les tsunamis se déplacent plus vite qu'une personne ne peut courir.",
+                    "Ne retournez pas à la plage tant que les Responsables des Services d'Urgence n'ont pas donné le signal 'Tout est Clear'.",
+                    "Toutes les zones côtières basses peuvent être touchées par un tsunami.",
+                    "Les tsunamis peuvent survenir à tout moment du jour ou de la nuit.",
+                    "Les tsunamis peuvent remonter les rivières et les cours d'eau depuis l'océan.",
+                    "Les tsunamis peuvent facilement contourner les îles et être tout aussi dangereux sur les côtes ne faisant pas face à la source du tsunami.",
+                    "Préparez un kit d'urgence avec les produits de première nécessité (eau, denrées alimentaires, couvertures, matériel de premiers secours, médicaments, radio, torche) qui soit portable lors d'une évacuation.",
+                    "Partagez vos connaissances avec votre famille et vos amis, cela pourrait leur sauver la vie."
+                ]
+            }
+        ]
+    }
+  warning_en.json: |
+    {
+        "id": "tsunami_warning_system",
+        "title": "Tsunami Warning System",
+        "sections": [
+            {
+                "id": "what_is_a_tsunami",
+                "title": "What Is A Tsunami?",
+                "content": "A tsunami is a series of waves traveling at speeds of over 800 km/h in the deep ocean where they go unnoticed. Once the waves reach the shallow waters of the coast, the energy of the huge water body manifest themselves as they crash with devastating force across the shore and penetrates inland, particularly low lying areas, causing mass devastation in terms of lives and property on its way. Tsunamis are generated primarily by earthquakes occurring on the ocean floor. Underwater volcanic eruptions, landslides or a meteorite can also generate tsunamis."
+            },
+            {
+                "id": "earthquake_type",
+                "title": "What Type Of Earthquake Generates A Tsunami?",
+                "content": "Tsunamis are typically generated by earthquakes that occur along subduction zones. A subduction zone is an area on the earth where two tectonic plates meet and move towards one another, with one sliding underneath the other and moving down into the earth at rates typically measured in centimetres per year."
+            },
+            {
+                "id": "mauritius_at_risk",
+                "title": "Is Mauritius At Risk?",
+                "content": "There are various factors that determines the level to which a landmass or coastal area will be affected by an approaching tsunami wave. They are the onshore topography immediate to the coast, the topography under the sea (bathymetry) offshore and the directivity of the maximum energy waves. So far Mauritius has not experienced any major amplification of tsunami waves, but they do reach our coasts. For example, very minor inundation was experienced from the Tsunami of December 26, 2004 while Rodrigues was more affected. So far we have no record of any significant tsunami that has affected coastal areas in Mauritius or Rodrigues. Nevertheless, there is still a possibility that Tsunamis generated from either the Sumatra or the Makran source affect the coasts of Mauritius or Rodrigues and this calls for preparedness in the event of a potentially destructive tsunami."
+            },
+            {
+                "id": "warning_system",
+                "title": "Tsunami Warning System in Mauritius",
+                "content": "As at now occurrence of a Tsunami cannot be predicted and paradoxically it can occur at any time during a year and at any time during a day. The Tsunami Warning System in Mauritius has taken into consideration the degree of risk as well as the time factor. In virtue of its geographical location, Mauritius and Rodrigues have a lead-time of 5-7 hours before tsunami waves are likely to reach their coasts from either the Sumatra or the Makran source.",
+                "stages": [
+                    {
+                        "id": "tsunami_watch",
+                        "level": 1,
+                        "title": "Tsunami Watch",
+                        "content": "This bulletin implies that a strong earthquake, generally of the magnitude greater than or equal to 7.0 on the Richter Scale, has occurred in a region adjacent to the Indian Ocean and the likelihood of a tsunami being generated is evoked. The bulletin is issued as a means of providing an advance alert to areas that could be impacted by destructive tsunami waves.",
+                        "instructions": [
+                            "The public, sea-goers and fishermen in particular will be advised not to venture out at sea or on the beach.",
+                            "Boats to be secured ashore.",
+                            "Vessels to proceed off lagoon."
+                        ]
+                    },
+                    {
+                        "id": "tsunami_warning",
+                        "level": 2,
+                        "title": "Tsunami Warning",
+                        "content": "This bulletin confirms that a destructive tsunami will affect Mauritius / Rodrigues within the next 5-7 hours. In case the incident point is closer to Mauritius / Rodrigues, the lead-time will be correspondingly lesser.",
+                        "instructions": [
+                            "Plan for the evacuation of vulnerable coastal areas will be implemented."
+                        ]
+                    },
+                    {
+                        "id": "termination",
+                        "level": 3,
+                        "title": "Termination",
+                        "content": "This bulletin will be issued after information from the Police, Fisheries post, Environment Officials, observations from tide gauges at Port Louis and Port Mathurin and general sea state observation confirm that significant tsunami waves are no longer being noted."
+                    }
+                ]
+            }
+        ]
+    }
+  warning_fr.json: |
+    {
+        "id": "tsunami_warning_system",
+        "title": "Système d'Avertissement aux Tsunamis",
+        "sections": [
+            {
+                "id": "what_is_a_tsunami",
+                "title": "Qu'est-ce qu'un Tsunami ?",
+                "content": "Un tsunami est une série de vagues se déplaçant à des vitesses supérieures à 800 km/h dans les profondeurs de l'océan où elles passent inaperçues. Lorsque les vagues atteignent les eaux peu profondes du littoral, l'énergie de cette immense masse d'eau se manifeste en s'écrasant avec une force dévastatrice sur le rivage et en pénétrant à l'intérieur des terres, notamment dans les zones basses, causant des destructions massives en termes de vies humaines et de biens. Les tsunamis sont principalement générés par des séismes survenant sur le fond océanique. Des éruptions volcaniques sous-marines, des glissements de terrain ou un météorite peuvent également générer des tsunamis."
+            },
+            {
+                "id": "earthquake_type",
+                "title": "Quel type de séisme génère un Tsunami ?",
+                "content": "Les tsunamis sont généralement générés par des séismes qui se produisent le long de zones de subduction. Une zone de subduction est une zone de la terre où deux plaques tectoniques se rejoignent et se rapprochent l'une de l'autre, l'une glissant sous l'autre et s'enfonçant dans la terre à des vitesses généralement mesurées en centimètres par an."
+            },
+            {
+                "id": "mauritius_at_risk",
+                "title": "Maurice est-elle en danger ?",
+                "content": "Plusieurs facteurs déterminent le niveau auquel une masse terrestre ou une zone côtière sera affectée par une vague de tsunami approchante. Il s'agit de la topographie côtière immédiate, de la topographie sous-marine (bathymétrie) au large et de la directivité des vagues d'énergie maximale. Jusqu'à présent, Maurice n'a pas connu d'amplification majeure des vagues de tsunami, mais celles-ci atteignent nos côtes. Par exemple, une très légère inondation a été constatée lors du Tsunami du 26 décembre 2004, tandis que Rodrigues a été plus touché. Jusqu'à présent, nous n'avons aucun enregistrement d'un tsunami significatif ayant affecté les zones côtières de Maurice ou de Rodrigues. Néanmoins, il existe toujours une possibilité que des tsunamis générés par la source de Sumatra ou de Makran affectent les côtes de Maurice ou de Rodrigues, ce qui nécessite une préparation en cas de tsunami potentiellement destructeur."
+            },
+            {
+                "id": "warning_system",
+                "title": "Système d'Avertissement aux Tsunamis à Maurice",
+                "content": "À ce jour, la survenance d'un Tsunami ne peut être prédite et paradoxalement, elle peut survenir à tout moment de l'année et à tout moment de la journée. Le Système d'Avertissement aux Tsunamis à Maurice a pris en considération le degré de risque ainsi que le facteur temps. En vertu de sa situation géographique, Maurice et Rodrigues disposent d'un délai de 5 à 7 heures avant que les vagues de tsunami n'atteignent probablement leurs côtes depuis la source de Sumatra ou de Makran.",
+                "stages": [
+                    {
+                        "id": "tsunami_watch",
+                        "level": 1,
+                        "title": "Veille Tsunami",
+                        "content": "Ce bulletin indique qu'un séisme de forte magnitude, généralement supérieure ou égale à 7,0 sur l'échelle de Richter, s'est produit dans une région adjacente à l'océan Indien et que la probabilité qu'un tsunami soit généré est évoquée. Le bulletin est émis afin de fournir une alerte préalable aux zones susceptibles d'être touchées par des vagues de tsunami destructrices.",
+                        "instructions": [
+                            "Le public, les usagers de la mer et les pêcheurs en particulier seront invités à ne pas s'aventurer en mer ou sur la plage.",
+                            "Les bateaux doivent être sécurisés à terre.",
+                            "Les navires doivent quitter le lagon."
+                        ]
+                    },
+                    {
+                        "id": "tsunami_warning",
+                        "level": 2,
+                        "title": "Avertissement Tsunami",
+                        "content": "Ce bulletin confirme qu'un tsunami destructeur affectera Maurice / Rodrigues dans les 5 à 7 heures suivantes. Si le point d'incident est plus proche de Maurice / Rodrigues, le délai sera proportionnellement réduit.",
+                        "instructions": [
+                            "Le plan d'évacuation des zones côtières vulnérables sera mis en œuvre."
+                        ]
+                    },
+                    {
+                        "id": "termination",
+                        "level": 3,
+                        "title": "Fin d'Alerte",
+                        "content": "Ce bulletin sera émis après que les informations de la Police, des postes des Pêches, des responsables de l'Environnement, les observations des marégraphes de Port Louis et de Port Mathurin ainsi que l'observation générale de l'état de la mer confirment que des vagues de tsunami significatives ne sont plus observées."
+                    }
+                ]
+            }
+        ]
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: mes-api-tsunami

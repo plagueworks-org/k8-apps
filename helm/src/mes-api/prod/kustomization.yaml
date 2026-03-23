@@ -2,7 +2,10 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - configmap.yaml
+  - contacts-configmap.yaml
+  - cyclone-configmap.yaml
+  - torrentialrain-configmap.yaml
+  - tsunami-configmap.yaml
 
 helmCharts:
   - name: plagueworks-k8-standard-charts
