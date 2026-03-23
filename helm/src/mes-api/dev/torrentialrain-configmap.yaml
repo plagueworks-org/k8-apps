@@ -1,0 +1,112 @@
+apiVersion: v1
+data:
+  precautions_en.json: |
+    {
+        "id": "torrential_rain_precautions",
+        "title": "Precautions",
+        "sections": [
+            {
+                "id": "precautions_during_torrential_rain",
+                "title": "Precautions during torrential rain",
+                "content": "As soon as a torrential rains warning comes in force, the public is advised to take the following precautions:",
+                "precautions": [
+                    "Keep school children indoors and not to send them to school.",
+                    "Avoid venturing near flooded rivers and streams and overflowing bridges.",
+                    "Avoid taking long trips in vehicles, especially in flood prone areas. Do not cross flooded bridges or submerged areas either by foot or by vehicle.",
+                    "In flood prone areas, secure your belongings and properties. If the water level continues to rise in flood prone areas, evacuate the area if necessary.",
+                    "Avoid going near hill or mountain slopes prone to landslide."
+                ]
+            }
+        ]
+    }
+  precautions_fr.json: |
+    {
+        "id": "torrential_rain_precautions",
+        "title": "Précautions",
+        "sections": [
+            {
+                "id": "precautions_during_torrential_rain",
+                "title": "Précautions lors de pluies torrentielles",
+                "content": "Dès qu'un avertissement de pluies torrentielles entre en vigueur, le public est invité à prendre les précautions suivantes :",
+                "precautions": [
+                    "Garder les enfants scolarisés à l'intérieur et ne pas les envoyer à l'école.",
+                    "Éviter de s'aventurer près des rivières et cours d'eau en crue ainsi que des ponts en débordement.",
+                    "Éviter d'effectuer de longs trajets en véhicule, notamment dans les zones inondables. Ne pas traverser les ponts inondés ou les zones submergées, que ce soit à pied ou en véhicule.",
+                    "Dans les zones inondables, sécurisez vos biens et propriétés. Si le niveau de l'eau continue de monter dans les zones inondables, évacuez la zone si nécessaire.",
+                    "Éviter de s'approcher des versants de collines ou de montagnes sujets aux glissements de terrain."
+                ]
+            }
+        ]
+    }
+  warning_en.json: |
+    {
+        "id": "torrential_rain_warning_system",
+        "title": "Torrential Rain Warning System",
+        "sections": [
+            {
+                "id": "criteria",
+                "title": "When does torrential rain conditions exist?",
+                "content": "Following observations indicating that accumulated rainfall has reached 100 millimetres in a given region or is likely to reach 100 millimetres in a given region in the ensuing hour, and the rain is expected to continue."
+            },
+            {
+                "id": "hazards",
+                "title": "Hazards",
+                "content": "Torrential rain can cause flash floods or urban floods in any locality while the most likely effect is water accumulations in flood prone areas. Heavy rain may also be responsible for the overflow of rivulets and streams or even major rivers leading to riverine flooding. Such floods usually occur downstream where it may not be necessarily raining heavily. Another hazard in the aftermath of heavy rain is landslide which can occur on hill or mountain slopes which are usually considered as high-risk areas."
+            },
+            {
+                "id": "flood_warning_scope",
+                "title": "Flood Warning Scope",
+                "content": "Mauritius Meteorological Services provide flood warning of a general nature without being site specific or quantifying water level in rivers."
+            },
+            {
+                "id": "warning_bulletin",
+                "title": "Torrential Rain Warning Bulletin",
+                "content": "Following observations indicating that accumulated rainfall has reached 100 millimetres in a given region or is likely to reach 100 millimetres in a given region in the ensuing hour, and the rain is expected to continue, the Mauritius Meteorological Services will issue warnings at regular intervals and will be broadcasted on the MBC and private radio stations.",
+                "stakeholders": [
+                    "Prime Minister's Office",
+                    "Mauritius Police Force",
+                    "NDRRMC",
+                    "Ministry of Education and Human Resource",
+                    "Ministry of Tertiary Education, Science and Research"
+                ]
+            }
+        ]
+    }
+  warning_fr.json: |
+    {
+        "id": "torrential_rain_warning_system",
+        "title": "Système d'Avertissement des Pluies Torrentielles",
+        "sections": [
+            {
+                "id": "criteres",
+                "title": "Quand les conditions de pluies torrentielles existent-elles ?",
+                "content": "Suite à des observations indiquant que les précipitations accumulées ont atteint 100 millimètres dans une région donnée ou sont susceptibles d'atteindre 100 millimètres dans une région donnée dans l'heure qui suit, et que la pluie devrait continuer."
+            },
+            {
+                "id": "risques",
+                "title": "Risques",
+                "content": "Les pluies torrentielles peuvent provoquer des crues soudaines ou des inondations urbaines dans n'importe quelle localité, tandis que l'effet le plus probable est l'accumulation d'eau dans les zones inondables. De fortes pluies peuvent également être responsables du débordement de ruisseaux et de cours d'eau, voire de grands fleuves, entraînant des inondations fluviales. Ces inondations surviennent généralement en aval où il ne pleut pas nécessairement fortement. Un autre danger consécutif aux fortes pluies est le glissement de terrain, qui peut se produire sur des versants de collines ou de montagnes généralement considérés comme des zones à haut risque."
+            },
+            {
+                "id": "flood_warning_scope",
+                "title": "Portée de l'Avertissement d'Inondation",
+                "content": "Les Services Météorologiques de Maurice fournissent des avertissements d'inondation de nature générale, sans être spécifiques à un site particulier ni quantifier le niveau d'eau dans les rivières."
+            },
+            {
+                "id": "warning_bulletin",
+                "title": "Bulletin d'Avertissement de Pluies Torrentielles",
+                "content": "Suite à des observations indiquant que les précipitations accumulées ont atteint 100 millimètres dans une région donnée ou sont susceptibles d'atteindre 100 millimètres dans une région donnée dans l'heure qui suit, et que la pluie devrait continuer, les Services Météorologiques de Maurice émettront des avertissements à intervalles réguliers qui seront diffusés sur la MBC et les stations de radio privées.",
+                "stakeholders": [
+                    "Bureau du Premier Ministre",
+                    "Force Policière de Maurice",
+                    "NDRRMC",
+                    "Ministère de l'Éducation et des Ressources Humaines",
+                    "Ministère de l'Enseignement Supérieur, des Sciences et de la Recherche"
+                ]
+            }
+        ]
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: mes-api-torrentialrain
