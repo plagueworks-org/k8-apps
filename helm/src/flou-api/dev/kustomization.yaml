@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: flouapi
 
 resources:
+  - namespace.yaml
   - es.yaml
   - helmrelease.yaml
 

@@ -4,12 +4,8 @@ name: flou-api
 
 # Namespace
 namespace:
-  create: true
+  create: false
   name: flouapi
-  labels:
-    function: application
-    category: api
-    es: ghcr
 
 # Replica
 replicaCount: 1
