@@ -57,16 +57,16 @@ spec:
             key: dopplerToken
 
 ---
-# ClusterSecretStore for Koneksyon Projects
+# ClusterSecretStore for Flou Projects
 apiVersion: external-secrets.io/v1
 kind: ClusterSecretStore
 metadata:
-  name: doppler-koneksyon-creds
+  name: doppler-flou-creds
   namespace: es
 spec:
   provider:
     doppler:
-      project: koneksyon
+      project: flou
       config: prd
       auth:
         secretRef:

@@ -1,8 +1,8 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: koneksyon-api-release
-  namespace: koneksyonapi
+  name: flou-api-release
+  namespace: flouapi
 spec:
   driftDetection:
     mode: enabled
@@ -15,5 +15,5 @@ spec:
 
   valuesFrom:
     - kind: ConfigMap
-      name: koneksyon-api-values
+      name: flou-api-values
       valuesKey: values-01.yaml
