@@ -1,4 +1,3 @@
-
 # App name
 name: flou-api
 
@@ -13,20 +12,20 @@ replicaCount: 1
 # Image
 image:
   repository: ghcr.io/zanbalak/flou-api
-  tag: dev20260501-2e568f6
+  tag: dev20260509-59c8e5e
   pullPolicy: Always
 
 volumeMounts:
   - name: appsettings-secret
-    mountPath: /app/appsettings.json  # Path to your existing file
-    subPath: FLOU_API_APPSETTINGS  # The key from your secret
+    mountPath: /app/appsettings.json # Path to your existing file
+    subPath: FLOU_API_APPSETTINGS # The key from your secret
     readOnly: true
 
 volumes:
   - name: appsettings-secret
     secret:
       secretName: flou-api-appsettings
-      
+
 # Container port
 port: 8080
 
