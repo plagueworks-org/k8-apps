@@ -4,13 +4,12 @@ kind: Kustomization
 namespace: face-verification
 
 resources:
-  - es.yaml
   - helmrelease.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
 configMapGenerator:
-- name: compreface-values
+- name: insightface-rest-values
   namespace: face-verification
   files:
-  - values.yaml
+  - values-01.yaml

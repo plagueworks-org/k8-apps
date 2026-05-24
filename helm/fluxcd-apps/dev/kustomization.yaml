@@ -5,4 +5,4 @@ resources:
   - ./flou-api.yaml
   - ./mes-api.yaml
   - ./uniface.yaml
-  - ./compreface.yaml
+  - ./insightface-rest.yaml

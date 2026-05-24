@@ -6,4 +6,3 @@ resources:
   - gitrepository.yaml
   - kustomization-apps.yaml
   - ocirepository.yaml
-  - compreface-source.yaml
