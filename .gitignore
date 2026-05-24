@@ -8,8 +8,9 @@ env/
 # Helm Charts
 charts/
 
-# Instructions
+# Claude specific
 instructions.claude
+resumes.txt
 
 # Temporary files and folders
 temp-*/
