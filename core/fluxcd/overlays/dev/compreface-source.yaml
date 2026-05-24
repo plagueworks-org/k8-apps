@@ -7,4 +7,4 @@ spec:
   interval: 1h
   url: https://github.com/exadel-inc/compreface-kubernetes
   ref:
-    branch: master
+    branch: main
