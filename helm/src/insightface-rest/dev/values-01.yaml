@@ -58,10 +58,10 @@ healthChecks:
 resources:
   requests:
     cpu: "100m"
-    memory: "256Mi"
+    memory: "512Mi"
   limits:
     cpu: "300m"
-    memory: "1024Mi"
+    memory: "1536Mi"
 
 # Service
 service:
