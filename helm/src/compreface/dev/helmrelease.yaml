@@ -1,0 +1,22 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: compreface
+  namespace: face-verification
+spec:
+  driftDetection:
+    mode: enabled
+  interval: 5m
+
+  chart:
+    spec:
+      chart: helm-config
+      sourceRef:
+        kind: GitRepository
+        name: compreface-kubernetes
+        namespace: flux-system
+
+  valuesFrom:
+    - kind: ConfigMap
+      name: compreface-values
+      valuesKey: values.yaml
