@@ -35,18 +35,18 @@ deployment:
 # Health checks
 healthChecks:
   enabled: true
-  livenessProbe:
-    httpGet:
-      path: /healthz
-      port: 8000
+  liveness:
+    enabled: true
+    path: /healthz
+    port: 8000
     initialDelaySeconds: 30
     periodSeconds: 20
     timeoutSeconds: 5
     failureThreshold: 3
-  readinessProbe:
-    httpGet:
-      path: /readyz
-      port: 8000
+  readiness:
+    enabled: true
+    path: /readyz
+    port: 8000
     initialDelaySeconds: 30
     periodSeconds: 10
     timeoutSeconds: 5
@@ -55,11 +55,11 @@ healthChecks:
 # Resources
 resources:
   requests:
-    cpu: "500m"
-    memory: "1Gi"
+    cpu: "100m"
+    memory: "128Mi"
   limits:
-    cpu: "2000m"
-    memory: "2Gi"
+    cpu: "300m"
+    memory: "512Mi"
 
 # Service
 service:
