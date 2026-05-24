@@ -21,7 +21,7 @@ port: 8000
 # Container envs
 env:
   - name: UNIFACE_CACHE_DIR
-    value: "/models"
+    value: "/tmp/models"
   - name: REAL_THRESHOLD
     value: "0.85"
   - name: SPOOF_THRESHOLD
