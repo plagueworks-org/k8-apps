@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - ./flou-api.yaml
   - ./mes-api.yaml
+  - ./uniface.yaml
