@@ -24,6 +24,10 @@ env:
     value: "18080"
   - name: INFERENCE_BACKEND
     value: "onnx" # default to onnx for CPU/ARM64 inference
+  - name: LOG_LEVEL
+    value: "info"
+  - name: NUM_WORKERS
+    value: "1"
 
 # Deployment
 deployment:
