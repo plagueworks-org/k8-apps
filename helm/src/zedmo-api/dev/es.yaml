@@ -62,3 +62,19 @@ spec:
       conversionStrategy: Default
       decodingStrategy: None
       metadataPolicy: None
+
+  # Written into the zedmo Doppler project by the cloudflare repo's 200-zta
+  # component, so the AUD cannot go stale by being copied from the dashboard.
+  - secretKey: CF_ACCESS_TEAM_DOMAIN
+    remoteRef:
+      key: CF_ACCESS_TEAM_DOMAIN
+      conversionStrategy: Default
+      decodingStrategy: None
+      metadataPolicy: None
+
+  - secretKey: CF_ACCESS_AUD
+    remoteRef:
+      key: CF_ACCESS_AUD
+      conversionStrategy: Default
+      decodingStrategy: None
+      metadataPolicy: None

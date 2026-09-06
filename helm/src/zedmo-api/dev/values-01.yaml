@@ -69,20 +69,36 @@ env:
         name: zedmo-api-config
         key: ADMIN_SESSION_SECRET
 
-  # CF_ACCESS_TEAM_DOMAIN and CF_ACCESS_AUD are absent until Zero Trust exists.
+  # Cloudflare Zero Trust Access is the gate. The portal verifies the
+  # Cf-Access-Jwt-Assertion header against Cloudflare's JWKS, checking the
+  # issuer AND the audience; it never reads Cf-Access-Authenticated-User-Email,
+  # which is an ordinary header that anyone reaching the origin directly can set
+  # to whatever they like.
   #
-  # Know what that costs while it lasts: a shared password on a public
-  # hostname, with no rate limiting in front of it beyond Cloudflare's, standing
-  # between the internet and a service holding the Supabase service role key.
-  # Use a long random password, and treat this as temporary rather than as the
-  # arrangement. When Access is attached, add the two CF_ACCESS values (here and
-  # in es.yaml) and REMOVE these two: with the fallback unconfigured the login
-  # route is not mounted at all, so there is no form to attack and no shared
-  # secret to leak.
+  # Both values are published into Doppler by the cloudflare repo's 200-zta
+  # component, so the AUD follows the Access application instead of being
+  # copied from the dashboard and going quietly stale.
+  - name: CF_ACCESS_TEAM_DOMAIN
+    valueFrom:
+      secretKeyRef:
+        name: zedmo-api-config
+        key: CF_ACCESS_TEAM_DOMAIN
+
+  - name: CF_ACCESS_AUD
+    valueFrom:
+      secretKeyRef:
+        name: zedmo-api-config
+        key: CF_ACCESS_AUD
+
+  # NOTE: ADMIN_PASSWORD_HASH and ADMIN_SESSION_SECRET above are kept ONLY
+  # while Access is being verified.
   #
-  # The service refuses to start with neither auth path configured, so a
-  # half-finished switch crash-loops rather than serving the authored puzzle
-  # queue unauthenticated.
+  # Access is tried first, and a rejected Access token is a refusal rather than
+  # a demotion to the password, so keeping both does not weaken the Access path.
+  # What it does leave is a shared secret that still works on a request
+  # Cloudflare never saw. Remove both (here and in es.yaml) once a real sign-in
+  # through Access has succeeded: with the fallback unconfigured the login route
+  # is not mounted at all, so there is no form to attack.
 
 # Deployment
 deployment:
@@ -91,13 +107,17 @@ deployment:
 
 # Health checks
 #
-# /healthz is unauthenticated and deliberately empty, so probes do not need to
-# pass the Access gate.
+# /health is unauthenticated and deliberately empty, so probes do not need to
+# pass whatever gate is in front of the portal.
+#
+# The path is NOT configurable: the chart renders both probes against /health
+# and ignores an override here. It is written out anyway so the two files agree
+# about what is being hit.
 healthChecks:
   enabled: true
   livenessProbe:
     httpGet:
-      path: /healthz
+      path: /health
       port: 8080
     initialDelaySeconds: 15
     periodSeconds: 20
@@ -106,7 +126,7 @@ healthChecks:
 
   readinessProbe:
     httpGet:
-      path: /healthz
+      path: /health
       port: 8080
     initialDelaySeconds: 5
     periodSeconds: 10
