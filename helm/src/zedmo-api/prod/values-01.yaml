@@ -1,0 +1,159 @@
+
+# App name
+name: zedmo-api
+
+# Namespace
+namespace:
+  create: true
+  name: zedmoapi
+  labels:
+    function: application
+    category: api
+    # Provisions ghcr-pull-secret into this namespace via the
+    # ghcr-pull-secret ClusterExternalSecret. Required: the image is private.
+    es: ghcr
+
+# Replica
+replicaCount: 1
+
+# Image
+image:
+  repository: ghcr.io/mervinhemaraju/zedmo/admin
+  tag: prod
+  pullPolicy: Always
+
+# Container port
+port: 8080
+
+# Container envs
+#
+# The admin portal holds the Supabase SERVICE ROLE key, which bypasses RLS.
+# Nothing sensitive is written here: every secret comes from Doppler through
+# the ExternalSecret in es.yaml.
+env:
+  # Structured logs, so the cluster's collector gets JSON rather than prose.
+  - name: LOG_JSON
+    value: "true"
+
+  # The session cookie is Secure. Only a local plain-http run sets this false.
+  - name: SECURE_COOKIES
+    value: "true"
+
+  # Drives the dashboard's queue-depth warning. A target, not a limit.
+  - name: QUEUE_DEPTH_TARGET_DAYS
+    value: "30"
+
+  - name: SUPABASE_URL
+    valueFrom:
+      secretKeyRef:
+        name: zedmo-api-config
+        key: SUPABASE_URL
+
+  - name: SUPABASE_SERVICE_ROLE_KEY
+    valueFrom:
+      secretKeyRef:
+        name: zedmo-api-config
+        key: SUPABASE_SERVICE_ROLE_KEY
+
+  # Cloudflare Zero Trust Access is the gate in production. Both values are
+  # required for the app to verify the Cf-Access-Jwt-Assertion header.
+  - name: CF_ACCESS_TEAM_DOMAIN
+    valueFrom:
+      secretKeyRef:
+        name: zedmo-api-config
+        key: CF_ACCESS_TEAM_DOMAIN
+
+  - name: CF_ACCESS_AUD
+    valueFrom:
+      secretKeyRef:
+        name: zedmo-api-config
+        key: CF_ACCESS_AUD
+
+  # ADMIN_PASSWORD_HASH and ADMIN_SESSION_SECRET are deliberately ABSENT.
+  #
+  # The fallback password exists for local work and for a deployment Access is
+  # not yet in front of. With it unset, the login route is not mounted at all,
+  # so this deployment has no login form to attack and no shared secret to
+  # leak. See docs/decisions/0013 in the zedmo repository.
+  #
+  # The consequence is worth knowing before a deploy: with neither auth path
+  # configured the service REFUSES TO START, by design. So if the Access values
+  # above are missing, this pod crash-loops rather than serving the authored
+  # puzzle queue unauthenticated.
+
+# Deployment
+deployment:
+  imagePullSecrets:
+    - name: ghcr-pull-secret
+
+# Health checks
+#
+# /healthz is unauthenticated and deliberately empty, so probes do not need to
+# pass the Access gate.
+healthChecks:
+  enabled: true
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: 8080
+    initialDelaySeconds: 15
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /healthz
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Resources
+#
+# A single-operator internal portal: a handful of requests per authoring
+# session, against a table that grows by four rows a day.
+resources:
+  requests:
+    cpu: "50m"
+    memory: "64Mi"
+  limits:
+    cpu: "150m"
+    memory: "128Mi"
+
+# Service
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+# Ingress
+#
+# cloudflareProxied MUST stay true. Cloudflare Zero Trust Access only sits in
+# front of proxied records; unproxied, traffic reaches the origin directly, the
+# Cf-Access-Jwt-Assertion header never gets set, and the portal falls back to
+# an auth path that is not configured here.
+ingress:
+  enabled: true
+  host: zedmoapi.tropikode.com
+  entryPoints:
+    - websecure
+  tls:
+    enabled: true
+    certResolver: le
+  externalDns:
+    enabled: true
+    target: traefik-prod.plagueworks.org
+    cloudflareProxied: "true"
+    cloudflareComment: "Zedmo Admin API managed by ExternalDns in oke-prod-zeus-apps"
+
+# Applies node affinity
+nodeAffinity:
+  enabled: true
+  required:
+    - key: node-pool
+      operator: In
+      values:
+        - default-pool
