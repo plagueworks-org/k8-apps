@@ -1,14 +1,14 @@
 ---
-# ClusterSecretStore for Flou Projects
+# ClusterSecretStore for Zedmo Projects
 apiVersion: external-secrets.io/v1
 kind: ClusterSecretStore
 metadata:
-  name: doppler-flou-creds
+  name: doppler-zedmo-creds
   namespace: es
 spec:
   provider:
     doppler:
-      project: flou
+      project: zedmo
       config: dev
       auth:
         secretRef:
