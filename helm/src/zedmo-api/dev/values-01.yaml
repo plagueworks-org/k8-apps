@@ -14,7 +14,7 @@ replicaCount: 1
 
 # Image
 image:
-  repository: ghcr.io/mervinhemaraju/zedmo/admin
+  repository: ghcr.io/mervinhemaraju/zedmo/api
   tag: dev
   pullPolicy: Always
 
