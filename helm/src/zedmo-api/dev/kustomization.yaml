@@ -1,14 +1,24 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-resources:
-  - es.yaml
+namespace: zedmoapi
 
-helmCharts:
-  - name: plagueworks-k8-standard-charts
-    repo: oci://ghcr.io/mervinhemaraju
-    version: "1.1.0"
-    releaseName: zedmo-api
+resources:
+  # First: the HelmRelease and the ExternalSecret both live in this namespace,
+  # so it has to exist before either can be applied. kustomize-controller
+  # orders by kind, so Namespace goes out ahead of them.
+  - namespace.yaml
+  - es.yaml
+  - helmrelease.yaml
+
+# The values reach the chart through a ConfigMap, not through a `helmCharts`
+# block. Flux's kustomize-controller does not run `kustomize build` with
+# --enable-helm, so a helmCharts generator fails the whole Kustomization. The
+# prod overlay can keep using helmCharts because ArgoCD does enable it.
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+  - name: zedmo-api-values
     namespace: zedmoapi
-    additionalValuesFiles:
+    files:
       - values-01.yaml

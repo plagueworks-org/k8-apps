@@ -4,14 +4,10 @@ name: zedmo-api
 
 # Namespace
 namespace:
-  create: true
+  # Created by namespace.yaml in this overlay, not by the chart. Both creating
+  # it would leave Helm refusing to adopt a namespace it does not own.
+  create: false
   name: zedmoapi
-  labels:
-    function: application
-    category: api
-    # Provisions ghcr-pull-secret into this namespace via the
-    # ghcr-pull-secret ClusterExternalSecret. Required: the image is private.
-    es: ghcr
 
 # Replica
 replicaCount: 1
