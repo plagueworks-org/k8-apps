@@ -2,7 +2,7 @@
     "apiVersion": "argoproj.io/v1alpha1",
     "kind": "Application",
     "metadata": {
-        "name": "koneksyonapi",
+        "name": "flouapi",
         "namespace": "argocd",
         "finalizers": [
             "resources-finalizer.argocd.argoproj.io"
@@ -12,10 +12,10 @@
         "project": "default",
         "destination": {
             "name": "zeus",
-            "namespace": "koneksyonapi"
+            "namespace": "flouapi"
         },
         "source": {
-            "path": "helm/src/koneksyon-api/prod",
+            "path": "helm/src/flou-api/prod",
             "repoURL": "https://github.com/plagueworks-org/k8-apps",
             "targetRevision": "main"
         },

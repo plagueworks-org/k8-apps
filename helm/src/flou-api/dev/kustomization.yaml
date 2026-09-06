@@ -1,17 +1,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: koneksyonapi
+namespace: flouapi
 
 resources:
+  - namespace.yaml
   - es.yaml
   - helmrelease.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
 configMapGenerator:
-- name: koneksyon-api-values
-  namespace: koneksyonapi
+- name: flou-api-values
+  namespace: flouapi
   files:
   - values-01.yaml
 
@@ -19,7 +20,7 @@ configMapGenerator:
 #   - name: plagueworks-k8-standard-charts
 #     repo: oci://ghcr.io/mervinhemaraju
 #     version: "1.1.0"
-#     releaseName: koneksyon-api
-#     namespace: koneksyonapi
+#     releaseName: flou-api
+#     namespace: flouapi
 #     additionalValuesFiles:
 #       - values-01.yaml

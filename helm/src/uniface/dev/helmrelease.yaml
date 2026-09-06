@@ -1,13 +1,13 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: koneksyon-api-release
-  namespace: koneksyonapi
+  name: uniface-release
+  namespace: face-verification
 spec:
   driftDetection:
     mode: enabled
   interval: 5m
-  
+
   chartRef:
     kind: OCIRepository
     name: plagueworks-helm-charts
@@ -15,5 +15,5 @@ spec:
 
   valuesFrom:
     - kind: ConfigMap
-      name: koneksyon-api-values
+      name: uniface-values
       valuesKey: values-01.yaml

@@ -1,2 +1,16 @@
+# Env files
+.env
+.venv
+.venv/
+venv/
+env/
+
 # Helm Charts
 charts/
+
+# Claude specific
+instructions.claude
+resumes.txt
+
+# Temporary files and folders
+temp-*/

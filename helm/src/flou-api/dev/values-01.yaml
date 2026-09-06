@@ -1,36 +1,31 @@
-
 # App name
-name: koneksyon-api
+name: flou-api
 
 # Namespace
 namespace:
-  create: true
-  name: koneksyonapi
-  labels:
-    function: application
-    category: api
-    es: ghcr
+  create: false
+  name: flouapi
 
 # Replica
 replicaCount: 1
 
 # Image
 image:
-  repository: ghcr.io/zanbalak/koneksyon-api
-  tag: dev20260304-8759f5f
+  repository: ghcr.io/zanbalak/flou-api
+  tag: dev20260509-59c8e5e
   pullPolicy: Always
 
 volumeMounts:
   - name: appsettings-secret
-    mountPath: /app/appsettings.json  # Path to your existing file
-    subPath: KONEKSYON_API_APPSETTINGS  # The key from your secret
+    mountPath: /app/appsettings.json # Path to your existing file
+    subPath: FLOU_API_APPSETTINGS # The key from your secret
     readOnly: true
 
 volumes:
   - name: appsettings-secret
     secret:
-      secretName: koneksyon-api-appsettings
-      
+      secretName: flou-api-appsettings
+
 # Container port
 port: 8080
 
@@ -69,7 +64,7 @@ service:
 # Ingress
 ingress:
   enabled: true
-  host: staging-koneksyonapi.plagueworks.org
+  host: staging-flouapi.plagueworks.org
   entryPoints:
     - websecure
   tls:
@@ -79,7 +74,7 @@ ingress:
     enabled: true
     target: traefik-dev.plagueworks.org
     cloudflareProxied: "true"
-    cloudflareComment: "Koneksyon API managed by ExternalDns in oke-dev-helios-apps"
+    cloudflareComment: "Flou API managed by ExternalDns in oke-dev-helios-apps"
 
 # Applies node affinity
 nodeAffinity:

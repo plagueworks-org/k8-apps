@@ -1,0 +1,88 @@
+# App name
+name: insightface-rest
+
+# Namespace
+namespace:
+  create: false
+  name: face-verification
+
+# Replica
+replicaCount: 1
+
+# Image
+image:
+  repository: ghcr.io/plagueworks-org/insightface-rest
+  tag: latest
+  pullPolicy: Always
+
+# Container port
+port: 18080
+
+# Container envs
+env:
+  - name: PORT
+    value: "18080"
+  - name: INFERENCE_BACKEND
+    value: "onnx" # default to onnx for CPU/ARM64 inference
+  - name: LOG_LEVEL
+    value: "INFO"
+  - name: NUM_WORKERS
+    value: "1"
+  - name: NUMBA_DISABLE_JIT
+    value: "1"
+  - name: NUMBA_CACHE_DIR
+    value: "/tmp/numba_cache"
+
+# Deployment
+deployment:
+  imagePullSecrets:
+    - name: ghcr-pull-secret
+
+# Health checks
+healthChecks:
+  enabled: true
+  liveness:
+    enabled: true
+    path: /info
+    port: 18080
+    initialDelaySeconds: 30
+    periodSeconds: 20
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readiness:
+    enabled: true
+    path: /info
+    port: 18080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+# Resources
+resources:
+  requests:
+    cpu: "100m"
+    memory: "512Mi"
+  limits:
+    cpu: "300m"
+    memory: "1536Mi"
+
+# Service
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+  targetPort: 18080
+
+# No ingress — internal only
+ingress:
+  enabled: false
+
+# Applies node affinity
+nodeAffinity:
+  enabled: true
+  required:
+    - key: node-pool
+      operator: In
+      values:
+        - default-pool
