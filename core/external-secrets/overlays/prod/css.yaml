@@ -74,3 +74,22 @@ spec:
             namespace: default
             name: doppler-token-auth-api
             key: dopplerToken
+
+---
+# ClusterSecretStore for Zedmo Projects
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: doppler-zedmo-creds
+  namespace: es
+spec:
+  provider:
+    doppler:
+      project: zedmo
+      config: prd
+      auth:
+        secretRef:
+          dopplerToken:
+            namespace: default
+            name: doppler-token-auth-api
+            key: dopplerToken
