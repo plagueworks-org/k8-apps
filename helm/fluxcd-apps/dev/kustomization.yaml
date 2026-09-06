@@ -3,5 +3,4 @@ kind: Kustomization
 
 resources:
   - ./mes-api.yaml
-  - ./uniface.yaml
-  - ./insightface-rest.yaml
+  - ./zedmo-api.yaml

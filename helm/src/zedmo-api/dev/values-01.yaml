@@ -31,17 +31,23 @@ port: 8080
 # Nothing sensitive is written here: every secret comes from Doppler through
 # the ExternalSecret in es.yaml.
 env:
-  # Structured logs, so the cluster's collector gets JSON rather than prose.
-  - name: LOG_JSON
-    value: "true"
-
-  # The session cookie is Secure. Only a local plain-http run sets this false.
-  - name: SECURE_COOKIES
-    value: "true"
-
   # Drives the dashboard's queue-depth warning. A target, not a limit.
   - name: QUEUE_DEPTH_TARGET_DAYS
     value: "30"
+
+  # Structured logs, so the cluster's collector gets JSON rather than prose.
+  - name: LOG_JSON
+    valueFrom:
+      secretKeyRef:
+        name: zedmo-api-config
+        key: LOG_JSON
+
+  # The session cookie is Secure. Only a local plain-http run sets this false.
+  - name: SECURE_COOKIES
+    valueFrom:
+      secretKeyRef:
+        name: zedmo-api-config
+        key: SECURE_COOKIES
 
   - name: SUPABASE_URL
     valueFrom:
@@ -55,31 +61,32 @@ env:
         name: zedmo-api-config
         key: SUPABASE_SERVICE_ROLE_KEY
 
-  # Cloudflare Zero Trust Access is the gate in production. Both values are
-  # required for the app to verify the Cf-Access-Jwt-Assertion header.
-  # - name: CF_ACCESS_TEAM_DOMAIN
-  #   valueFrom:
-  #     secretKeyRef:
-  #       name: zedmo-api-config
-  #       key: CF_ACCESS_TEAM_DOMAIN
+  - name: ADMIN_PASSWORD_HASH
+    valueFrom:
+      secretKeyRef:
+        name: zedmo-api-config
+        key: ADMIN_PASSWORD_HASH
 
-  # - name: CF_ACCESS_AUD
-  #   valueFrom:
-  #     secretKeyRef:
-  #       name: zedmo-api-config
-  #       key: CF_ACCESS_AUD
+  - name: ADMIN_SESSION_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: zedmo-api-config
+        key: ADMIN_SESSION_SECRET
 
-  # ADMIN_PASSWORD_HASH and ADMIN_SESSION_SECRET are deliberately ABSENT.
+  # CF_ACCESS_TEAM_DOMAIN and CF_ACCESS_AUD are absent until Zero Trust exists.
   #
-  # The fallback password exists for local work and for a deployment Access is
-  # not yet in front of. With it unset, the login route is not mounted at all,
-  # so this deployment has no login form to attack and no shared secret to
-  # leak. See docs/decisions/0013 in the zedmo repository.
+  # Know what that costs while it lasts: a shared password on a public
+  # hostname, with no rate limiting in front of it beyond Cloudflare's, standing
+  # between the internet and a service holding the Supabase service role key.
+  # Use a long random password, and treat this as temporary rather than as the
+  # arrangement. When Access is attached, add the two CF_ACCESS values (here and
+  # in es.yaml) and REMOVE these two: with the fallback unconfigured the login
+  # route is not mounted at all, so there is no form to attack and no shared
+  # secret to leak.
   #
-  # The consequence is worth knowing before a deploy: with neither auth path
-  # configured the service REFUSES TO START, by design. So if the Access values
-  # above are missing, this pod crash-loops rather than serving the authored
-  # puzzle queue unauthenticated.
+  # The service refuses to start with neither auth path configured, so a
+  # half-finished switch crash-loops rather than serving the authored puzzle
+  # queue unauthenticated.
 
 # Deployment
 deployment:
@@ -131,10 +138,9 @@ service:
 
 # Ingress
 #
-# cloudflareProxied MUST stay true. Cloudflare Zero Trust Access only sits in
-# front of proxied records; unproxied, traffic reaches the origin directly, the
-# Cf-Access-Jwt-Assertion header never gets set, and the portal falls back to
-# an auth path that is not configured here.
+# cloudflareProxied stays true. It keeps the origin IP out of DNS while the
+# only gate is a password, and it is also what Cloudflare Zero Trust Access
+# will need later: Access only sits in front of proxied records.
 ingress:
   enabled: true
   host: zedmoapi-dev.tropikode.com

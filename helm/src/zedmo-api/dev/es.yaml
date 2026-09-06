@@ -34,17 +34,31 @@ spec:
       conversionStrategy: Default
       decodingStrategy: None
       metadataPolicy: None
-
-  - secretKey: CF_ACCESS_TEAM_DOMAIN
+      
+  - secretKey: ADMIN_PASSWORD_HASH
     remoteRef:
-      key: CF_ACCESS_TEAM_DOMAIN
+      key: ADMIN_PASSWORD_HASH
       conversionStrategy: Default
       decodingStrategy: None
       metadataPolicy: None
 
-  - secretKey: CF_ACCESS_AUD
+  - secretKey: ADMIN_SESSION_SECRET
     remoteRef:
-      key: CF_ACCESS_AUD
+      key: ADMIN_SESSION_SECRET
+      conversionStrategy: Default
+      decodingStrategy: None
+      metadataPolicy: None
+
+  - secretKey: LOG_JSON
+    remoteRef:
+      key: LOG_JSON
+      conversionStrategy: Default
+      decodingStrategy: None
+      metadataPolicy: None
+
+  - secretKey: SECURE_COOKIES
+    remoteRef:
+      key: SECURE_COOKIES
       conversionStrategy: Default
       decodingStrategy: None
       metadataPolicy: None
