@@ -42,14 +42,14 @@ runs:
       with:
         version: "${{ inputs.helmversion }}"
 
-    - name: Install Namespaces
-      shell: bash
-      working-directory: core/namespaces/overlays/${{ inputs.environment }}
-      run: |
-        echo "Creating namespaces..."
-        kubectl kustomize . > namespaces-config.yaml
-        kubectl apply -f namespaces-config.yaml
-        echo "Namespaces created"
+    # - name: Install Namespaces
+    #   shell: bash
+    #   working-directory: core/namespaces/overlays/${{ inputs.environment }}
+    #   run: |
+    #     echo "Creating namespaces..."
+    #     kubectl kustomize . > namespaces-config.yaml
+    #     kubectl apply -f namespaces-config.yaml
+    #     echo "Namespaces created"
 
     - name: Install External Secrets Operator
       shell: bash
