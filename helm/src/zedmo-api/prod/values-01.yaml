@@ -13,9 +13,12 @@ namespace:
 replicaCount: 1
 
 # Image
+#
+# `:prod` is built from main by push-package.yml in the zedmo repo. Each build
+# is also tagged `:sha-<commit>`, which is what to pin here for a rollback.
 image:
   repository: ghcr.io/mervinhemaraju/zedmo/api
-  tag: dev
+  tag: prod
   pullPolicy: Always
 
 # Container port
@@ -25,7 +28,8 @@ port: 8080
 #
 # The admin portal holds the Supabase SERVICE ROLE key, which bypasses RLS.
 # Nothing sensitive is written here: every secret comes from Doppler through
-# the ExternalSecret in es.yaml.
+# the ExternalSecret in es.yaml. This is the PROD project's key: a portal
+# pointed at the wrong project writes puzzles into the wrong queue.
 env:
   # Drives the dashboard's queue-depth warning. A target, not a limit.
   - name: QUEUE_DEPTH_TARGET_DAYS
@@ -57,19 +61,7 @@ env:
         name: zedmo-api-config
         key: SUPABASE_SERVICE_ROLE_KEY
 
-  - name: ADMIN_PASSWORD_HASH
-    valueFrom:
-      secretKeyRef:
-        name: zedmo-api-config
-        key: ADMIN_PASSWORD_HASH
-
-  - name: ADMIN_SESSION_SECRET
-    valueFrom:
-      secretKeyRef:
-        name: zedmo-api-config
-        key: ADMIN_SESSION_SECRET
-
-  # Cloudflare Zero Trust Access is the gate. The portal verifies the
+  # Cloudflare Zero Trust Access is the only gate. The portal verifies the
   # Cf-Access-Jwt-Assertion header against Cloudflare's JWKS, checking the
   # issuer AND the audience; it never reads Cf-Access-Authenticated-User-Email,
   # which is an ordinary header that anyone reaching the origin directly can set
@@ -78,6 +70,8 @@ env:
   # Both values are published into Doppler by the cloudflare repo's 200-zta
   # component, so the AUD follows the Access application instead of being
   # copied from the dashboard and going quietly stale.
+  #
+  # No password fallback in prod (see es.yaml): the login route is not mounted.
   - name: CF_ACCESS_TEAM_DOMAIN
     valueFrom:
       secretKeyRef:
@@ -89,16 +83,6 @@ env:
       secretKeyRef:
         name: zedmo-api-config
         key: CF_ACCESS_AUD
-
-  # NOTE: ADMIN_PASSWORD_HASH and ADMIN_SESSION_SECRET above are kept ONLY
-  # while Access is being verified.
-  #
-  # Access is tried first, and a rejected Access token is a refusal rather than
-  # a demotion to the password, so keeping both does not weaken the Access path.
-  # What it does leave is a shared secret that still works on a request
-  # Cloudflare never saw. Remove both (here and in es.yaml) once a real sign-in
-  # through Access has succeeded: with the fallback unconfigured the login route
-  # is not mounted at all, so there is no form to attack.
 
 # Deployment
 deployment:
@@ -154,12 +138,11 @@ service:
 
 # Ingress
 #
-# cloudflareProxied stays true. It keeps the origin IP out of DNS while the
-# only gate is a password, and it is also what Cloudflare Zero Trust Access
-# will need later: Access only sits in front of proxied records.
+# cloudflareProxied stays true: Access only sits in front of proxied records,
+# and it keeps the origin IP out of DNS.
 ingress:
   enabled: true
-  host: staging-zedmoapi.plagueworks.org
+  host: zedmoapi.plagueworks.org
   entryPoints:
     - websecure
   tls:
@@ -167,9 +150,9 @@ ingress:
     certResolver: le
   externalDns:
     enabled: true
-    target: traefik-dev.plagueworks.org
+    target: traefik-prod.plagueworks.org
     cloudflareProxied: "true"
-    cloudflareComment: "Zedmo Admin API managed by ExternalDns in oke-dev-helios-apps"
+    cloudflareComment: "Zedmo Admin API managed by ExternalDns in oke-prod-zeus-apps"
 
 # Applies node affinity
 nodeAffinity:

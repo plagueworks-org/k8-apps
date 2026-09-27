@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # The ExternalSecret lives in this namespace, and the chart does not create
+  # it (namespace.create is false), so it has to be declared here. ArgoCD
+  # applies Namespace ahead of namespaced kinds.
+  - namespace.yaml
+  - es.yaml
+
+# ArgoCD runs kustomize with --enable-helm, so the chart is inflated here
+# directly. The dev overlay cannot do this: Flux's kustomize-controller does
+# not enable helm, which is why dev goes through a HelmRelease instead.
+helmCharts:
+  - name: plagueworks-k8-standard-charts
+    repo: oci://ghcr.io/mervinhemaraju
+    version: "1.1.0"
+    releaseName: zedmo-api
+    namespace: zedmoapi
+    additionalValuesFiles:
+      - values-01.yaml

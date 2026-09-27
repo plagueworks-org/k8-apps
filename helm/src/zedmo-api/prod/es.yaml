@@ -1,0 +1,74 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: zedmo-api-config-token
+  namespace: zedmoapi
+spec:
+  # Reference to the ClusterSecretStore. On the prod cluster this store reads
+  # the zedmo Doppler project's `prd` config.
+  secretStoreRef:
+    name: doppler-zedmo-creds
+    kind: ClusterSecretStore
+
+  # Describes the Kubernetes Secret that will be created
+  target:
+    name: zedmo-api-config      # Name of the Kubernetes Secret to be created
+    creationPolicy: Owner       # The secret will be deleted when this ExternalSecret is deleted
+
+  # Describes the data to fetch from Doppler
+  #
+  # SUPABASE_SERVICE_ROLE_KEY bypasses Row Level Security entirely, which is
+  # what protects the hand-authored puzzle queue. It belongs to this service and
+  # to the developer's local tooling, nowhere else. If it ever leaks it is
+  # compromised: rotate it in Supabase, do not just remove it from Doppler.
+  #
+  # Every key below must exist in Doppler `prd`: a single missing key fails the
+  # whole ExternalSecret and the pod never starts.
+  #
+  # There is deliberately no ADMIN_PASSWORD_HASH or ADMIN_SESSION_SECRET here.
+  # Prod is Access only: with the password fallback unconfigured the login
+  # route is not mounted, so there is no form to attack.
+  data:
+  - secretKey: SUPABASE_URL
+    remoteRef:
+      key: SUPABASE_URL
+      conversionStrategy: Default
+      decodingStrategy: None
+      metadataPolicy: None
+
+  - secretKey: SUPABASE_SERVICE_ROLE_KEY
+    remoteRef:
+      key: SUPABASE_SERVICE_ROLE_KEY
+      conversionStrategy: Default
+      decodingStrategy: None
+      metadataPolicy: None
+
+  - secretKey: LOG_JSON
+    remoteRef:
+      key: LOG_JSON
+      conversionStrategy: Default
+      decodingStrategy: None
+      metadataPolicy: None
+
+  - secretKey: SECURE_COOKIES
+    remoteRef:
+      key: SECURE_COOKIES
+      conversionStrategy: Default
+      decodingStrategy: None
+      metadataPolicy: None
+
+  # Written into the zedmo Doppler project by the cloudflare repo's 200-zta
+  # component, so the AUD cannot go stale by being copied from the dashboard.
+  - secretKey: CF_ACCESS_TEAM_DOMAIN
+    remoteRef:
+      key: CF_ACCESS_TEAM_DOMAIN
+      conversionStrategy: Default
+      decodingStrategy: None
+      metadataPolicy: None
+
+  - secretKey: CF_ACCESS_AUD
+    remoteRef:
+      key: CF_ACCESS_AUD
+      conversionStrategy: Default
+      decodingStrategy: None
+      metadataPolicy: None
