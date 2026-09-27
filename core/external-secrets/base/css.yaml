@@ -35,3 +35,23 @@ spec:
             namespace: default
             name: doppler-token-auth-api
             key: dopplerToken
+---
+# ClusterSecretStore for the Cloudflare Creds Project. Holds the Cloudflare API
+# token used by external-dns (DNS records) and Traefik (Let's Encrypt DNS
+# challenge).
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  name: doppler-cloudflare-creds
+  namespace: es
+spec:
+  provider:
+    doppler:
+      project: cloudflare-creds
+      config: prd
+      auth:
+        secretRef:
+          dopplerToken:
+            namespace: default
+            name: doppler-token-auth-api
+            key: dopplerToken

@@ -6,7 +6,7 @@ metadata:
 spec:
   # Reference to the ClusterSecretStore
   secretStoreRef:
-    name: doppler-apps-creds
+    name: doppler-cloudflare-creds
     kind: ClusterSecretStore
 
   # Describes the Kubernetes Secret that will be created
