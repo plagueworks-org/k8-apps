@@ -38,24 +38,6 @@ spec:
             key: dopplerToken
 
 ---
-# ClusterSecretStore for Cloud OCI Creds Projects
-apiVersion: external-secrets.io/v1
-kind: ClusterSecretStore
-metadata:
-  name: doppler-cloud-oci-creds
-  namespace: es
-spec:
-  provider:
-    doppler:
-      project: cloud-oci-creds
-      config: prd
-      auth:
-        secretRef:
-          dopplerToken:
-            namespace: default
-            name: doppler-token-auth-api
-            key: dopplerToken
----
 # ClusterSecretStore for Zedmo Projects
 apiVersion: external-secrets.io/v1
 kind: ClusterSecretStore
