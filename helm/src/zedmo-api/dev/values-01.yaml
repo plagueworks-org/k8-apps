@@ -37,13 +37,14 @@ env:
   - name: ENVIRONMENT
     value: "dev"
 
-  # Read-only view of the published GrowthBook flags on Game settings. The SDK
-  # client key is public by design (the app ships it); GROWTHBOOK_HOST is left
-  # to its default, https://cdn.growthbook.io.
+  # Read-only view of the published GrowthBook flags on Game settings. Extracted
+  # from Doppler's APP_CONFIG by the second ExternalSecret in es.yaml. The SDK
+  # client key is public by design; GROWTHBOOK_HOST keeps its default,
+  # https://cdn.growthbook.io.
   - name: GROWTHBOOK_CLIENT_KEY
     valueFrom:
       secretKeyRef:
-        name: zedmo-api-config
+        name: zedmo-api-growthbook
         key: GROWTHBOOK_CLIENT_KEY
 
   # Structured logs, so the cluster's collector gets JSON rather than prose.
