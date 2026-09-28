@@ -72,3 +72,14 @@ spec:
       conversionStrategy: Default
       decodingStrategy: None
       metadataPolicy: None
+
+  # Taken from inside APP_CONFIG, the app's env file as JSON, so the portal
+  # shows the flags of the same SDK connection the app reads. One copy of the
+  # key in Doppler, not two that can drift.
+  - secretKey: GROWTHBOOK_CLIENT_KEY
+    remoteRef:
+      key: APP_CONFIG
+      property: GROWTHBOOK_CLIENT_KEY
+      conversionStrategy: Default
+      decodingStrategy: None
+      metadataPolicy: None

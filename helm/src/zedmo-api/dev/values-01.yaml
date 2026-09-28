@@ -31,6 +31,21 @@ env:
   - name: QUEUE_DEPTH_TARGET_DAYS
     value: "30"
 
+  # Which Supabase project this portal writes to, shown in the portal's
+  # top-right badge. Required: the portal refuses to start without it. Set here
+  # rather than in Doppler so the label follows the overlay it was deployed from.
+  - name: ENVIRONMENT
+    value: "dev"
+
+  # Read-only view of the published GrowthBook flags on Game settings. The SDK
+  # client key is public by design (the app ships it); GROWTHBOOK_HOST is left
+  # to its default, https://cdn.growthbook.io.
+  - name: GROWTHBOOK_CLIENT_KEY
+    valueFrom:
+      secretKeyRef:
+        name: zedmo-api-config
+        key: GROWTHBOOK_CLIENT_KEY
+
   # Structured logs, so the cluster's collector gets JSON rather than prose.
   - name: LOG_JSON
     valueFrom:
