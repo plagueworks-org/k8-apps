@@ -67,11 +67,11 @@ env:
         name: zedmo-api-config
         key: SUPABASE_URL
 
-  - name: SUPABASE_SERVICE_ROLE_KEY
+  - name: SUPABASE_SECRET_KEY
     valueFrom:
       secretKeyRef:
         name: zedmo-api-config
-        key: SUPABASE_SERVICE_ROLE_KEY
+        key: SUPABASE_SECRET_KEY
 
   - name: ADMIN_PASSWORD_HASH
     valueFrom:
