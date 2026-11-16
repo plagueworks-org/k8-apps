@@ -16,7 +16,7 @@ spec:
 
   # Describes the data to fetch from Doppler
   #
-  # SUPABASE_SERVICE_ROLE_KEY bypasses Row Level Security entirely, which is
+  # SUPABASE_SECRET_KEY bypasses Row Level Security entirely, which is
   # what protects the hand-authored puzzle queue. It belongs to this service and
   # to the developer's local tooling, nowhere else. If it ever leaks it is
   # compromised: rotate it in Supabase, do not just remove it from Doppler.
@@ -28,9 +28,9 @@ spec:
       decodingStrategy: None
       metadataPolicy: None
 
-  - secretKey: SUPABASE_SERVICE_ROLE_KEY
+  - secretKey: SUPABASE_SECRET_KEY
     remoteRef:
-      key: SUPABASE_SERVICE_ROLE_KEY
+      key: SUPABASE_SECRET_KEY
       conversionStrategy: Default
       decodingStrategy: None
       metadataPolicy: None
